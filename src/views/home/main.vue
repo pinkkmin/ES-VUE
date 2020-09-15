@@ -23,8 +23,8 @@
         </el-tab-pane>
       </el-tabs>
       <div class="home-header-carousel">
-        <el-carousel height="120px">
-          <el-carousel-item class="main-carousel-item" v-for="item in match.data" :key="item">
+        <el-carousel height="120px" v-loading="matchLoading">
+          <el-carousel-item class="main-carousel-item" v-for="(item,index) in match.data" :key="'match-'+index">
             <el-badge
               style="width:50px;margin-top:10px;margin-left:5px;float:left;"
               :value="'time：'+item.time"
@@ -48,7 +48,6 @@
             <div style="float:left;margin-top:20px;margin-left:10px;width:45%">
               <el-link href="https://element.eleme.io" target="_blank" :underline="false">
                 <el-avatar
-                  :fit="fit"
                   style="background-color: #fff;"
                   shape="square"
                   :size="95"
@@ -61,7 +60,7 @@
                   <span v-if="item.homeScore > item.awayScore">{{ item.homeScore }}</span>
                   <span v-else style="color:#7D7B73;">{{ item.homeScore }}</span>
                 </span>
-                <span style="margin-left:70px;">VS</span>
+                <span style="margin-left:50px;">VS</span>
               </span>
             </div>
             <div style="float:left;margin-top:20px;width:40%">
@@ -74,7 +73,6 @@
               </span>
               <el-link href="https://element.eleme.io" target="_blank" :underline="false">
                 <el-avatar
-                  :fit="fit"
                   style="background-color:#fff;"
                   shape="square"
                   :size="95"
@@ -92,10 +90,10 @@
           <i class="el-icon-message-solid" style="font-size: 25px; color: #89177D" />
           <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">公告栏</span>
         </el-card>
-        <el-collapse accordion v-loading="loading">
+        <el-collapse accordion >
           <el-collapse-item
             v-for="(item,index) in notice.data"
-            :key="index"
+            :key="'notice-'+index"
             :title="' (๑•́ωก̀๑) ' + item.title +  '\t' + item.date"
             :name="item.title"
           >
@@ -142,23 +140,23 @@
           <i class="el-icon-medal-1" style="font-size: 25px; color: #89177D" />
           <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">积分榜</span>
         </el-card>
-        <el-table :data="team" stripe style="width: 100%">
+        <el-table :data="team" stripe style="width: 100%"  v-loading="teamLoading">
           <el-table-column prop="indexLeft" label="排名" width="50">
             <template slot-scope="scope">
-            <el-tag color="#37a2da" effect="dark">{{ team[scope.$index].indexLeft  }}</el-tag>
-            </template>           
+              <el-tag color="#37a2da" effect="dark">{{ team[scope.$index].indexLeft }}</el-tag>
+            </template>
           </el-table-column>
-          <el-table-column prop="teamLeft" width="80" label="球队" />
-          <el-table-column prop="wfLeft" label="胜负" width="75" />
+          <el-table-column prop="teamLeft" label="球队" />
+          <el-table-column prop="wfLeft" label="胜负"  />
 
-          <el-table-column prop="indexRight" label="排名" width="50">
+          <el-table-column prop="indexRight" label="排名" width="60">
             <template slot-scope="scope">
-            <el-tag v-if="scope.$index < 2" color="#37a2da" effect="dark">{{ scope.$index + 11 }}</el-tag>
-           <el-tag v-else color="#b7b7b7" effect="dark">{{ scope.$index + 11 }}</el-tag>
-            </template>     
+              <el-tag v-if="scope.$index < 2" color="#37a2da" effect="dark">{{ scope.$index + 11 }}</el-tag>
+              <el-tag v-else color="#b7b7b7" effect="dark">{{ scope.$index + 11 }}</el-tag>
+            </template>
           </el-table-column>
-          <el-table-column prop="teamRight" width="80" label="球队" />
-          <el-table-column prop="wfRight" label="胜负" width="80" />
+          <el-table-column prop="teamRight" label="球队" />
+          <el-table-column prop="wfRight" label="胜负"  />
         </el-table>
       </div>
     </div>
@@ -167,175 +165,72 @@
 
 <script>
 import { validNoticeList } from '@/utils/validate'
-/**  request API data
- *   notice : {
- *     data: [{
- *              noticeId: '', 公告Id
- *              auth: '', 发布者String
- *              authId:'', 发布者Id(即用户ID)
- *              date: '', 日期String
- *              title: '', 标题String
- *              content:'', 内容 String
- *              //以下内容可为空
- *              home: {     
- *                teamId:'',     主队ID
- *                teamName:''    主队名     
- *              },
- *              away: {
- *                teamId: '', 客队ID
- *                teamName:'', 客队名
- *              },
- *              player: {  相关球员
- *                playerId: '', 
- *                playerName:''
- *              }
- *            },...
- *     ], 
- *     count: 100   公告数量 int
- *    }
- * 
- */
+import { teamSortList, getTodayMatch } from '@/api/home'
+import { getCurSeason } from '@/api/global'
 export default {
   data() {
-    var test = [
-      {
-        indexLeft: 1,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 2,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 3,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 4,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 5,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 6,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 7,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 8,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 9,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-      {
-        indexLeft: 10,
-        teamLeft: '开拓者',
-        wfLeft: '42/2',
-        indexRight: '10',
-        teamRight: '湖人',
-        wfRight: '51/0',
-      },
-    ]
     const matchData = {
-      count: 5,
+      count: 0,
       data: [
-      {
-        matchId: 'ewewev43',
-        homeName: '南京大圣',
-        homeId: 'cba2020002',
-        awayName: '福建中华鲟',
-        awayId: 'cba2020001',
-        homeScore: 123,
-        awayScore: 112,
-        status: 1,
-        time: '09:00',
-      },
-      {
-        matchId: 'ewewev43',
-        homeName: '广东华南虎',
-        homeId: 'cba2020003',
-        awayName: '福建中华鲟',
-        awayId: 'cba2020015',
-        homeScore: 0,
-        awayScore: 0,
-        status: 0,
-        time: '19:00',
-      },
-      {
-        matchId: 'ewewev43',
-        homeName: '上海大鲨鱼',
-        homeId: 'cba2020009',
-        awayName: '四川蓝鲸',
-        awayId: 'cba2020007',
-        homeScore: 103,
-        awayScore: 112,
-        status: 1,
-        time: '17:00',
-      },
-    ]
+        {
+          matchId: 'cba2020001',
+          homeName: '主队',
+          homeId: 'cba2020002',
+          awayName: '客队',
+          awayId: 'cba2020001',
+          homeScore: 123,
+          awayScore: 112,
+          status: 0,
+          time: '09:00',
+        }
+      ],
     }
     const notice_ = validNoticeList()
     return {
+      matchLoading:true,
+      teamLoading:true,
+      curSeason: { season: '' },
       match: matchData,
-      team: test,
-      notice: notice_,  
+      team: '',
+      notice: notice_,
       pagination: {
         // 分页
         total: 50,
       },
     }
   },
+  created() {
+    this.init()
+  },
   methods: {
+    handleClick(){},
+    init() {
+      // console.log(JSON.stringify(this.curSeason))
+      getCurSeason()
+        .then((res) => {
+          this.curSeason = res.data
+          teamSortList(this.curSeason).then((res) => {
+            this.team = res.data
+            this.teamLoading  =false
+          })
+        })
+        .catch(() => {
+          teamSortList({ season: '2019-2020' }).then((res) => {
+            this.team = res.data
+          })
+        })
+       
+        getTodayMatch().then((res)=>{
+          this.match = res.data
+          this.matchLoading  =false
+        })
+    },
     getIcon() {
       return 'http://mat1.gtimg.com/sports/nba/logo/1602/20187.png'
     },
     handleCurrentChange() {
       this.loading = false
       this.$message('now')
-      // this.update()
     },
     handlePreChange() {
       this.$message('pre')
@@ -376,7 +271,7 @@ export default {
   margin-top: 20px;
 }
 .notice-class {
-  width: 65%;
+  width: 60%;
   float: left;
 }
 .notice-head {
@@ -386,7 +281,7 @@ export default {
 }
 .home-table {
   float: right;
-  width: 34%;
+  width: 39%;
   margin-bottom: 100px;
 }
 .home-avatar {
@@ -398,7 +293,7 @@ export default {
   width: 30%;
 }
 .match-carousel-span {
-  font-size: 30px;
+  font-size: 31px;
   margin-left: 10px;
   font-weight: bolder;
   vertical-align: middle;
@@ -419,10 +314,10 @@ export default {
   font-weight: bolder;
   font-size: 20px;
 }
-.main-carousel-item:nth-child(2n-1){
- background:url(/background/match7.png);
+.main-carousel-item:nth-child(2n-1) {
+  background: url(/background/match7.png);
 }
-.main-carousel-item:nth-child(2n){
- background:url(/background/match6.png);
+.main-carousel-item:nth-child(2n) {
+  background: url(/background/match6.png);
 }
 </style>

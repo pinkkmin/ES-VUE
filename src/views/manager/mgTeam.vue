@@ -1,5 +1,5 @@
 <template>
-  <el-card style="margin: 20px 10px 20px 10px">
+  <el-card v-loading="loading" style="margin: 20px 10px 20px 10px">
     <el-button icon="el-icon-attract" style="margin-bottom:20px;" type="success" @click="dialogCreate=true">新 建 球 队</el-button>
     <el-dialog title="球队管理-新建" :visible.sync="dialogCreate" :before-close="handleCloseCreate">
       <editTeam ref="createForm" title="新 建" :data="createData" />
@@ -18,11 +18,11 @@
           />
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="队名" />
-      <el-table-column prop="city" label="所在城市" />
-      <el-table-column prop="coach" label="主教练" />
-      <el-table-column prop="home" width="250px" label="主场球馆" />
-      <el-table-column prop="club" width="250px" label="俱乐部" />
+      <el-table-column prop="teamName" label="队名" />
+      <el-table-column prop="teamCity" label="所在城市" />
+      <el-table-column prop="teamCoach" label="主教练" />
+      <el-table-column prop="teamHome" width="250px" label="主场球馆" />
+      <el-table-column prop="teamClub" width="250px" label="俱乐部" />
       <el-table-column label="操 作">
         <template slot-scope="scope">
           <el-button
@@ -42,6 +42,7 @@
 <script>
 import editTeam from '@/components/others/editTeam.vue'
 import { validManagerTeamList } from '@/utils/validate'
+import {getTeamList} from '@/api/global'
 export default {
   components: {
     editTeam,
@@ -49,7 +50,9 @@ export default {
   data() {
     const table = validManagerTeamList()
     return {
-      teamTable: table,
+      //base
+      loading: true,
+      teamTable: '',
       dialogCreate: false,
       dialogVisible: false,
       createData: {
@@ -70,8 +73,18 @@ export default {
       },
     }
   },
-  created() {},
+  created() {
+    this.initData()
+  },
   methods: {
+    initData() {
+      getTeamList().then((res)=>{
+        this.teamTable = res.data.data
+        this.loading = false
+      }).catch(()=>{
+
+      })
+    },
     handleEdit(index) {
       this.editTeamData = this.teamTable[index]
       this.$refs.editForm.setForm(this.teamTable[index])

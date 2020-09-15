@@ -10,8 +10,8 @@
         <el-select v-model="slectTeam.homePlayerId" clearable filterable placeholder="选择主球员">
           <el-option-group v-for="group in playerList" :key="group.teamId" :label="group.teamName">
             <el-option
-              v-for="item in group.data"
-              :key="item.playerId"
+              v-for="(item,index) in group.data"
+              :key="'home'+index"
               :label="item.playerName"
               :value="item.playerId"
               :disabled="item.playerId === slectTeam.awayPlayerId"
@@ -23,8 +23,8 @@
         <el-select v-model="slectTeam.awayPlayerId" clearable filterable placeholder="选择客球员">
           <el-option-group v-for="group in playerList" :key="group.teamId" :label="group.teamName">
             <el-option
-              v-for="item in group.data"
-              :key="item.playerId"
+              v-for="(item,index) in group.data"
+              :key="'away'+index"
               :label="item.playerName"
               :value="item.playerId"
               :disabled="item.playerId === slectTeam.homePlayerId"
@@ -42,7 +42,7 @@
           <el-image
             style="width: 170px; height: 170px"
             :src="'team/' + queryForm.homePlayerId +'.png'"
-            :fit="fit"
+            fit
           ></el-image>
         </div>
         <div style="float:left;margin-top:17px;margin-left:10px;">
@@ -108,7 +108,7 @@
           <el-image
             style="width: 160px; height: 170px"
             :src="'team/' + queryForm.awayPlayerId +'.png'"
-            :fit="fit"
+            fit
           ></el-image>
         </div>
       </div>

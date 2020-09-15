@@ -4,19 +4,18 @@
       <el-form
         style="margin-top:15px;"
         :model="queryForm"
-        :rules="rules"
         :inline="true"
         ref="queryForm"
         label-width="100px"
       >
         <el-form-item label="球队">
           <el-select v-model="queryForm.teamId" clearable filterable placeholder="选择球队">
-              <el-option
-                v-for="item in teamList"
-                :key="item"
-                :label="item.name"
-                :value="item.teamId"
-              />
+            <el-option
+              v-for="(item,index) in teamList"
+              :key="'team'+index"
+              :label="item.teamName"
+              :value="item.teamId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="球员">
@@ -34,9 +33,9 @@
       <el-collapse accordion v-loading="loading">
         <el-collapse-item
           v-for="(item,index) in notice.data"
-          :key="index"
+          :key="'notice'+index"
           :title="' (๑•́ωก̀๑) ' + item.title +  '\t' + item.date"
-          :name="item.title"
+          :name="index+item.title"
         >
           <el-tag
             type="success"
@@ -93,9 +92,10 @@
         @prev-click="handlePreChange"
         @next-click="handleNextChange"
         :hide-on-single-page="true"
+        :current-page.sync="queryForm.page"
         layout="total,prev, pager, next,jumper"
         :total="notice.count"
-        :page-size="12"
+        :page-size="1"
       />
     </el-card>
   </div>
@@ -103,25 +103,23 @@
 
 <script>
 import editNoticeForm from '@/components/others/editNoticeForm.vue'
-import {
-  validNoticeList,
-  validNoticeList2,
-  validManagerTeamList,
-} from '@/utils/validate'
+import { queryNotices } from '@/api/manager'
+import { getTeamList } from '@/api/global'
 export default {
   components: {
     editNoticeForm,
   },
   data() {
-    const notice_ = validNoticeList()
-     const teamList_ = validManagerTeamList()
     return {
       //base
-      loading: false,
+      loading: true,
       dialogVisible: false,
       //data
-      notice: notice_,
-      teamList: teamList_,
+      notice: {
+        count: 100,
+        data: [],
+      },
+      teamList: [],
       editNoticeItem: {
         noticeId: '',
         auth: '',
@@ -146,17 +144,56 @@ export default {
         // 查询提交表单
         playerName: '',
         teamId: '',
+        page: 0,
+        pageSize: 10,
       },
     }
   },
+  created() {
+    getTeamList().then((res) => {
+      this.teamList = res.data.data
+    })
+    queryNotices(this.queryForm)
+      .then((qs) => {
+        this.notice = qs.data
+        this.loading = false
+      })
+      .catch(() => {
+        this.loading = false
+      })
+  },
   methods: {
-    query() {
-      alert('submit!')
-    },
-    update() {
+    handleCurrentChange() {
       this.loading = true
-      const notice2 = validNoticeList2()
-      this.notice = notice2
+      this.query()
+    },
+    handlePreChange() {
+      this.queryForm.page -= 1
+      this.loading = true
+      this.query()
+    },
+    handleNextChange() {
+      this.queryForm.page += 1
+      this.loading = true
+      this.query()
+    },
+    query() {
+      this.loading = true
+      this.queryForm.start = (this.queryForm.page - 1) * this.queryForm.pageSize
+      queryNotices(this.queryForm)
+        .then((qs) => {
+          this.notice = qs.data
+          this.loading = false
+          this.$notify({
+            title: '查询提示',
+            message: '查询结果返回成功,共计' + qs.data.count + '条结果',
+            type: 'success',
+            duration: 1700,
+          })
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     deleteNotice() {
       this.$confirm('此操作将删除该公告通知, 是否继续?', '提示', {
@@ -177,32 +214,19 @@ export default {
           })
         })
     },
-    handleClose(done) {
+    handleClose(done,sign) {
+      console.log(sign)
+      if(!sign) {
       this.$confirm('确认关闭？')
         .then((_) => {
-          this.$refs.editForm.resetForm()
           done()
         })
         .catch((_) => {})
+      }else done()
     },
     handleChange(index) {
-      this.editNoticeItem = this.notice.data[index]
-      this.$refs.editForm.setForm(this.editNoticeItem)
-    },
-    handleCurrentChange() {
-      const notice2 = validNoticeList()
-      this.notice = notice2
-      this.loading = false
-      this.$message('now')
-      // this.update()
-    },
-    handlePreChange() {
-      this.$message('pre')
-      this.update()
-    },
-    handleNextChange() {
-      this.update()
-      this.$message('next')
+      this.editNoticeItem = Object.assign({}, this.notice.data[index])
+      // this.$refs.editForm.setForm(this.editNoticeItem)
     },
   },
 }

@@ -1,16 +1,14 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-05 20:35:39
+-->
 <template>
-  <div :id="elId">
-    <div style="float:left;margin-left:10px;width:110px;">
+  <div v-loading="loading" :id="elId">
+    <div v-loading="loading" style="float:left;margin-left:10px;width:110px;">
       <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-        <el-avatar
-          style="background-color: #FFF;"
-          :fit="fit"
-          shape="square"
-          :size="90"
-          :src="'team/' + AnalysisData.playerId + '.png'"
-        />
+        <img style="background-color: #FFF;width:110px;" :src="logoUrl" :key="logoUrl" />
       </el-link>
-      <el-tag style="font-size:18px;">{{ AnalysisData.name }}</el-tag>
+      <el-tag style="font-size:18px;margin-top:10px;">{{ AnalysisData.name }}</el-tag>
       <el-tag
         type="success"
         style="margin-top:10px;margin-bottom:30px;font-size:18px;"
@@ -21,46 +19,84 @@
     <div style="float:left;margin-left:70px;width:450px;">
       <tabpane :tabPaneData="AnalysisData.tabPane" />
     </div>
-    <el-table :data="AnalysisData.tableData" style="width:500px">
-      <el-table-column prop="number" label width="100">
+    <el-table :data="tableData" style="margin-left:5%;width:auto">
+      <el-table-column prop="number" label>
         <template slot-scope="scope">
-          <el-tag color="#2ec7c9" effect="dark">{{ scope.$index + 2 }}</el-tag>
+          <el-tag color="#37a2da" effect="dark">{{ scope.$index + 2 }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="name" label width="300">
         <template slot-scope="scope">
           <div style="float:left;">
-            <span style="font-size:20px;">{{ AnalysisData.tableData[scope.$index].name }}</span>
+            <span style="font-size:20px;">{{ tableData[scope.$index].name }}</span>
             <el-tag
               effect="plain"
               style="margin-left:7px;"
               size="mini"
-            >#{{ AnalysisData.tableData[scope.$index].number}}</el-tag>
+            >#{{ tableData[scope.$index].number}}</el-tag>
             <el-tag
               effect="plain"
               type="success"
               style="margin-left:7px;"
               size="mini"
-            >#{{ getPosition(AnalysisData.tableData[scope.$index].position)}}</el-tag>
+            >#{{ getPosition(tableData[scope.$index].position)}}</el-tag>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="data" label width="100" />
+      <el-table-column prop="data" label />
     </el-table>
   </div>
 </template>
 
 <script>
-import bareChart from '@/components/echart/barEchart.vue'
 import tabpane from '@/components/others/tabPane.vue'
-import analysisPane from '@/components/others/AnalysisPane.vue'
 export default {
   props: {
-      AnalysisData:'',
-      elId: ''
+    AnalysisData: {
+      playerId: '',
+      name: '',
+      number: 0,
+      data: 0.0,
+      logo: 0,
+      tabPane: [],
+      tableData: [],
+    },
+  },
+  data() {
+    return {
+      elId: '',
+      loading: true,
+      tableData: [],
+      playerId: '',
+      logo: '', //是否有logo
+      baseUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
+      logoUrl: '',
+    }
+  },
+  watch: {
+    AnalysisData: {
+      handler(newValue, oldValue) {
+        if (this.AnalysisData !== '') {
+          this.tableData = this.AnalysisData.tableData
+          this.loading = false
+          this.logo = this.AnalysisData.logo
+          this.playerId = this.AnalysisData.playerId
+          if (this.logo === 1)
+            this.logoUrl = this.baseUrl + this.playerId + '.png'
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
+    this.logoUrl = this.baseUrl + '0.png'
+  },
+  computed: {
+    getId() {
+      this.elId = Math.random().toString(36).slice(-8)
+    },
   },
   methods: {
     getPosition(value) {
@@ -69,10 +105,9 @@ export default {
       else if (value === 'PF') return '大前锋'
       else if (value === 'SF') return '小前锋'
       else return '中锋'
-    }
+    },
   },
   components: {
-    bareChart,
     tabpane,
   },
 }

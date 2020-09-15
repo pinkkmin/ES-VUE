@@ -1,3 +1,7 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-09 23:37:32
+-->
 <template>
   <div>
     <div :id="elId" style="width: 320px;height:260px;" />
@@ -20,15 +24,29 @@ export default {
   data() {
     return {
       elId: '',
+      radData:{}
     }
   },
-  created() {
+  watch: {
+    data: {
+      deep: true,
+      immediate: true,
+      handler: function (newValue, oldValue) {
+       this.radData = this.data
+       if(this.elId != '') {
+        this.drawChart()
+       } 
+      },
+    },
+  },
+  created() { 
     this.elId = Math.random().toString(36).slice(-8)
   },
   methods: {
     drawChart() {
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById(this.elId))
+      
       // 指定图表的配置项和数据
       let option = {
         title: {
@@ -47,11 +65,11 @@ export default {
             },
           },
           indicator: [
-            { name: '场均得分', max: this.data.max.maxScore },
-            { name: '场均助攻', max: this.data.max.maxAssist },
-            { name: '场均篮板', max: this.data.max.maxBound },
-            { name: '场均抢断', max: this.data.max.maxSteal },
-            { name: '场均盖帽', max: this.data.max.maxBlock },
+            { name: '场均得分', max: this.radData.maxData.maxScore },
+            { name: '场均助攻', max: this.radData.maxData.maxAssist },
+            { name: '场均篮板', max: this.radData.maxData.maxBound },
+            { name: '场均抢断', max: this.radData.maxData.maxSteal },
+            { name: '场均盖帽', max: this.radData.maxData.maxBlock },
           ],
         },
         series: [
@@ -61,16 +79,16 @@ export default {
               trigger: 'item',
             },
             areaStyle: {},
-            data: this.data.data,
+            data: this.radData.data,
           },
         ],
       }
       myChart.setOption(option)
     },
   },
-  mounted() {
-    this.drawChart()
-  },
+  mounted(){
+    
+  }
 }
 </script>
 <style>

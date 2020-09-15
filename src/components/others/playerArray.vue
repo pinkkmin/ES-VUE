@@ -1,136 +1,78 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-08 00:59:45
+-->
 <template>
-  <el-card :id="elId">
       <el-table
-        class="table"
         :data="tableData"
-        style="width: 100%"
+        :id="elId"
+        v-loading="loading"
+       style="width: 97.9%;margin:0 1.0% 0 1.0%;font-size:17px;"
       >
-        <el-table-column prop="date" width="80">
+        <el-table-column prop="date">
+          <template scope="scope">
           <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-            <el-avatar :size="50" :src="circleUrl" />
+           <el-avatar v-if="tableData[scope.$index].logo === 0" :size="55" :src="baseUrl+'0.png'" shape="square" style="background-color: #fff;" />
+            <el-avatar v-else :size="55" :src="baseUrl+tableData[scope.$index].playerId+'.png'" shape="square" style="background-color: #fff;" />
           </el-link>
+          </template>
         </el-table-column>
-        <el-table-column prop="name" label="姓名" width="150" />
-        <el-table-column prop="number" label="号码" width="80" />
-        <el-table-column prop="position" label="位置" width="80" />
-        <el-table-column prop="height" label="身高(cm)" width="100" />
-        <el-table-column prop="weight" label="体重(kg)" width="100" />
-        <el-table-column prop="age" label="年龄" width="100" />
-        <el-table-column prop="score" label="场均得分" width="100" />
-        <el-table-column prop="rebound" label="场均篮板" width="100" />
-        <el-table-column prop="assist" label="场均助攻" width="100" />
-        <el-table-column prop="steal" label="场均抢断" width="100" />
-        <el-table-column prop="foul" label="场均犯规" width="100" />
+        <el-table-column prop="name" label="姓名" />
+        <el-table-column prop="number" label="号码" />
+        <el-table-column prop="position" label="位置">
+          <template scope="scop">
+          <span> {{ getPosition(tableData[scop.$index].position)}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="height" label="身高(cm)" />
+        <el-table-column prop="weight" label="体重(kg)" />
+        <el-table-column prop="age" label="年龄" />
+        <el-table-column prop="score" label="场均得分" />
+        <el-table-column prop="bound" label="场均篮板" />
+        <el-table-column prop="assist" label="场均助攻" />
+        <el-table-column prop="steal" label="场均抢断" />
+        <el-table-column prop="foul" label="场均犯规" />
       </el-table>
-  </el-card>
 </template>
 <script>
 export default {
   props: {
-    data: {
-      teamId: '',
-      teamName: '',
-    },
+    data: ''
   },
   data() {
-       const tableData = [{
-        date: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-        name: '王小虎',
-        number: 15,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-        name: '王小虎',
-        number: 25,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-01',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-08',
-        name: '厄桑-伊厄桑-伊利亚索瓦',
-        number: 57,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-06',
-        name: '王小虎',
-        number: 7,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-07',
-        name: '王小虎',
-        number: 45,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-07',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-07',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-07',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      },
-      {
-        date: '2016-05-07',
-        name: '王小虎',
-        number: 5,
-        position: '前锋',
-        weight: '100.2',
-        height: '205.3'
-      }
-      ]
     return {
+      loading:true,
       elId: '',
-      tableData: tableData
+      tableData: [],
+      baseUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
     }
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
   },
-  methods: {},
+  watch: {
+    data: {
+      handler(newValue, oldValue) {
+        if(JSON.stringify(this.data) !== "[]") {
+         // console.log(JSON.stringify(this.data))
+        this.tableData = this.data
+        this.loading = false
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
+  methods: {
+    getPosition(position) {
+      if(position === 'SG') return '得分后卫'
+      else if(position === 'PG') return '控球后卫'
+      else if(position === 'SF') return '小前锋'
+      else if(position === 'PF') return '大前锋'
+      else if(position === 'C') return '中锋'
+      return '--'
+    }
+  },
 }
 </script>
 <style>

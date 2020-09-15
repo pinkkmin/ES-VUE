@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card class="analysis-card" style="height:280px;">
+    <el-card v-loading="fcLoading" class="analysis-card" style="height:280px;">
       <div style="float:left; width:150px;">
         <img
           style="float:left; width:110px;margin-bottom:10px;"
@@ -12,7 +12,7 @@
           {{team.teamName }}
           <hr width="140px" align="center" color="#987cb9" size="1" />
         </span>
-        <el-tag type="success" style="font-size:18px;">排名：第{{ team.sort }}名</el-tag>
+        <el-tag type="success" style="font-size:18px;">排名：第{{ team.rand }}名</el-tag>
         <el-tag style="margin-top:5px;font-size:18px;">战绩：{{ team.win }}胜{{ team.fail }}负</el-tag>
       </div>
       <div id="analysis_" style="float:left;margin-left:60px;">
@@ -23,13 +23,13 @@
       </div>
     </el-card>
     <!--近期战况-->
-    <el-card class="analysis-card" style="height:290px;">
+    <el-card v-loading="blLoading" class="analysis-card" style="height:290px;">
       <baseline style="float:left;" title_="近七场赛况：" :show="true" :baseLineData="baseLineData" />
       <baseline style="float:left;" title_="赛季赛况：" :show="false" :baseLineData="baseLineData_" />
     </el-card>
     <!--数据王-->
     <div class="analysis-card" style="margin-bottom:10px;">
-      <div style="font-size:17px;font-weight: bolder;margin-top:10px;margin-bottom:5px;">球队数据王</div>
+      <el-card style="font-size:17px;font-weight: bolder;margin-top:10px;margin-bottom:5px;">球队数据王</el-card>
       <el-tabs v-model="tabsValue" :stretch="true" type="border-card" @tab-click="handleClick">
         <el-tab-pane label="场均得分">
           <analysisBestData id="bestScore" :AnalysisData="bestData.scoreData" />
@@ -52,7 +52,7 @@
       <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">赛季对比</span>
     </el-card>
     <div class="analysis-card" style="margin-top:2px;">
-      <el-tabs v-model="tabsValue_" :stretch="true" type="border-card" @tab-click="handleClick">
+      <el-tabs v-loading="yLoading" v-model="tabsValue_" :stretch="true" type="border-card" @tab-click="handleClick">
         <el-tab-pane label="场均得分">
           <yBarChart
             :data="seasonData.scoreSeason"
@@ -135,14 +135,14 @@
         </el-tab-pane>
         <el-tab-pane label="场均失误">
           <yBarChart
-            :data="seasonData.turnOverSeason"
+            :data="seasonData.turnoverSeason"
             name="失误"
             color="#2ec7c9"
             title="球队赛季情况"
             style="float:left;"
           />
           <yBarChart
-            :data="seasonData.allTeamTurnOverSeason"
+            :data="seasonData.allTeamTurnoverSeason"
             name="失误"
             color="#ec6a86"
             title="联盟情况"
@@ -151,43 +151,38 @@
         </el-tab-pane>
       </el-tabs>
     </div>
-    <el-card class="analysis-card" style="height:300px;margin-top:5px;margin-bottom:100px;">
-      <el-table :data="seasonData.seasonTable" stripe style="vertical-align:middle;width:100%">
-        <el-table-column prop="season" label="赛季" width="130" />
-        <el-table-column prop="score" label="场均得分" width="120" />
-        <el-table-column prop="bound" label="场均篮板" width="120" />
-        <el-table-column prop="assist" label="场均助攻" width="120" />
-        <el-table-column prop="steal" label="场均抢断" width="120" />
-        <el-table-column prop="block" label="场均盖帽" width="120" />
-        <el-table-column prop="turnover" label="场均失误" width="120" />
-        <el-table-column prop="foul" label="场均犯规" width="120" />
-        <el-table-column prop="free" label="场均罚球" width="120" />
+    <el-card v-loading="stLoading" class="analysis-card" style="height:300px;margin-top:5px;margin-bottom:100px;">
+      <el-table :data="seasonTable" stripe style="vertical-align:middle;width:100%">
+        <el-table-column prop="season" label="赛季" />
+        <el-table-column prop="score" label="场均得分" />
+        <el-table-column prop="bound" label="场均篮板" />
+        <el-table-column prop="assist" label="场均助攻" />
+        <el-table-column prop="steal" label="场均抢断" />
+        <el-table-column prop="block" label="场均盖帽" />
+        <el-table-column prop="turnover" label="场均失误" />
+        <el-table-column prop="foul" label="场均犯规" />
+        <el-table-column prop="free" label="场均罚球" />
       </el-table>
     </el-card>
   </div>
 </template>
 
 <script>
+//components
 import bareChart from '@/components/echart/barEchart.vue'
 import tabpane from '@/components/others/tabPane.vue'
 import analysisBestData from '@/components/others/AnalysisPane.vue'
 import baseline from '@/components/echart/baseLine.vue'
 import yBarChart from '@/components/echart/yBarChart.vue'
-/*mock data */
+//API
 import {
-  validScoreData,
-  validAssistData,
-  validBoundData,
-  validBlockData,
-  validStealData,
-  //赛季对比
-  validSeasonData_1,
-  validSeasonData_2,
-  validAllTeamSeasonData_1,
-  validAllTeamSeasonData_2,
-  // 表格
-  validseasonTable,
-} from '@/utils/validate'
+  getTeamFisrtCard,
+  getTeamSecondCard,
+  getTeamThirdCard,
+} from '@/api/home'
+import { lastSevenMatch, lastSeasonMatch,lastSeasonAvg } from '@/api/team'
+import { getCurSeason } from '@/api/global'
+/*mock data */
 export default {
   data() {
     /*数据对比--柱状图 */
@@ -202,147 +197,22 @@ export default {
         ['平均', 111.1, 24.2, 44.5, 7.7, 6.8, 13.1, 17.2],
       ],
     }
-    /* 最近七场--折线图 */
-    const baseLine = {
-      teamId: '',
-      teamName: '',
-      win: 4,
-      fail: 3,
-      getData: [82, 93, 91, 124, 114, 120, 121],
-      lostData: [102, 143, 101, 94, 154, 100, 111],
-      date: ['09-08', '09-10', '09-13', '09-15', '09-18', '09-28', '10-08'],
-    }
-    const baseLine_ = {
-      teamId: '',
-      teamName: '',
-      win: 8,
-      fail: 6,
-      getData: [
-        82,
-        93,
-        91,
-        124,
-        114,
-        120,
-        121,
-        82,
-        93,
-        91,
-        124,
-        114,
-        120,
-        121,
-        82,
-        93,
-        91,
-        124,
-        114,
-        120,
-        121,
-        82,
-        93,
-        91,
-        124,
-        114,
-        120,
-        121,
-      ],
-      lostData: [
-        102,
-        143,
-        101,
-        94,
-        154,
-        100,
-        111,
-        102,
-        143,
-        101,
-        94,
-        154,
-        100,
-        111,
-        102,
-        143,
-        101,
-        94,
-        154,
-        100,
-        111,
-        102,
-        143,
-        101,
-        94,
-        154,
-        100,
-        111,
-      ],
-      date: [
-        '01-08',
-        '01-15',
-        '01-18',
-        '01-19',
-        '01-23',
-        '01-26',
-        '01-30',
-        '02-02',
-        '02-04',
-        '02-05',
-        '02-07',
-        '02-10',
-        '02-25',
-        '02-27',
-        '03-02',
-        '03-05',
-        '03-08',
-        '03-10',
-        '03-18',
-        '03-28',
-        '04-08',
-        '04-18',
-        '05-10',
-        '05-13',
-        '07-15',
-        '09-18',
-        '09-25',
-        '09-29',
-      ],
-    }
-    /*标签页---数据王---饼图 */
-    const scoreData_ = validScoreData()
-    const assistData_ = validAssistData()
-    const blockData_ = validBlockData()
-    const boundData_ = validBoundData()
-    const stealData_ = validStealData()
-    /* 标签页-赛季对比--柱状图 */
-    const scoreSeason_ = validSeasonData_1()
-    const assistSeason_ = validSeasonData_2()
-    const boundSeason_ = validSeasonData_1()
-    const stealSeason_ = validSeasonData_2()
-    const turnOverSeason_ = validSeasonData_2()
-    const blockSeason_ = validSeasonData_1()
-    const foulSeason_ = validSeasonData_1()
-
-    const allTeamBlockSeason_ = validAllTeamSeasonData_1()
-    const allTeamScoreSeason_ = validAllTeamSeasonData_2()
-    const allTeamAssistSeason_ = validAllTeamSeasonData_1()
-    const allTeamBoundSeason_ = validAllTeamSeasonData_2()
-    const allTeamStealSeason_ = validAllTeamSeasonData_2()
-    const allTeamTurnOverSeason_ = validAllTeamSeasonData_2()
-    const allTeamFoulSeason_ = validAllTeamSeasonData_2()
-    // 表格
-    const table = validseasonTable()
     return {
       // base
       tabsValue: '',
       tabsValue_: '',
+      fcLoading: true,
+      blLoading: true,
+      yLoading: true,
+      stLoading: true,
       //data
+      info: {},
       team: {
-        teamId: 'cba2020012',
-        teamName: '开拓者',
-        win: 47,
-        fail: 23,
-        sort: 12,
+        teamId: 'cba2020003',
+        teamName: '球队名称',
+        win: 0,
+        fail: 0,
+        rand: 0,
       },
       radarData: {
         maxData: {
@@ -366,42 +236,83 @@ export default {
         data: bar_.data,
       },
       // 最近七天 本赛季
-      baseLineData: baseLine,
-      baseLineData_: baseLine_,
+      baseLineData: {},
+      baseLineData_: {},
       //second card ：best player  球队数据王
       bestData: {
-        scoreData: scoreData_,
-        assistData: assistData_,
-        boundData: boundData_,
-        blockData: blockData_,
-        stealData: stealData_,
+        scoreData: {},
+        assistData: {},
+        boundData: {},
+        blockData: {},
+        stealData: {},
       },
       // season
       seasonData: {
-        scoreSeason: scoreSeason_,
-        assistSeason: assistSeason_,
-        boundSeason: boundSeason_,
-        stealSeason: stealSeason_,
-        turnOverSeason: turnOverSeason_,
-        foulSeason: foulSeason_,
-        blockSeason: blockSeason_,
-        allTeamScoreSeason: allTeamScoreSeason_,
-        allTeamAssistSeason: allTeamAssistSeason_,
-        allTeamBoundSeason: allTeamBoundSeason_,
-        allTeamStealSeason: allTeamStealSeason_,
-        allTeamTurnOverSeason: turnOverSeason_,
-        allTeamFoulSeason: allTeamFoulSeason_,
-        allTeamBlockSeason: allTeamBlockSeason_,
+        scoreSeason: {},
+        assistSeason: {},
+        boundSeason: {},
+        stealSeason: {},
+        turnoverSeason: {},
+        foulSeason: {},
+        blockSeason: {},
+        allTeamScoreSeason: {},
+        allTeamAssistSeason: {},
+        allTeamBoundSeason: {},
+        allTeamStealSeason: {},
+        allTeamTurnoverSeason: {},
+        allTeamFoulSeason: {},
+        allTeamBlockSeason: {},
+        seasonTable: [],
         //table
-        seasonTable: table,
       },
+      seasonTable: [],
     }
   },
+  components: {
+    bareChart,
+    tabpane,
+    analysisBestData,
+    baseline,
+    yBarChart,
+  },
   created() {
-    this.scoreData = this.validScoreData()
+    this.init()
   },
   name: 'analysis_',
   methods: {
+    init() {
+      getCurSeason().then((res) => {
+        var parse = res.data
+        parse.teamId = this.team.teamId
+        this.info = Object.assign({}, parse)
+        getTeamFisrtCard(parse).then((res) => {
+          this.team = res.data.team
+          this.fcLoading = false
+          this.radarData = res.data.radarData
+          this.drawChart()
+          this.barData = res.data.barData
+        })
+        getTeamSecondCard(parse).then((sec) => {
+          this.bestData = sec.data
+        })
+        lastSevenMatch(this.info).then((res) => {
+          this.baseLineData = res.data
+        })
+        lastSeasonMatch(this.info).then((res) => {
+          this.baseLineData_ = res.data
+          this.blLoading = false
+        })
+         lastSeasonAvg(this.info).then((sec) => {
+         this.seasonData = sec.data
+         this.yLoading = false
+         //console.log(this.seasonData)
+        })
+         getTeamThirdCard(this.info).then((sec) => {
+          this.seasonTable = sec.data
+          this.stLoading = false
+        })
+      })
+    },
     handleClick(tab, event) {},
     getPosition(value) {
       if (value === 'PG') return '控球后卫'
@@ -454,13 +365,6 @@ export default {
   },
   mounted() {
     this.drawChart()
-  },
-  components: {
-    bareChart,
-    tabpane,
-    analysisBestData,
-    baseline,
-    yBarChart,
   },
 }
 </script>

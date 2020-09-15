@@ -4,56 +4,50 @@
       <el-form
         style="margin-top:15px;"
         :model="queryForm"
-        :rules="rules"
         :inline="true"
         ref="queryForm"
         label-width="100px"
       >
         <el-form-item label="球队">
-          <el-select v-model="queryForm.team" clearable filterable placeholder="选择球队">
+          <el-select v-model="queryForm.teamId" clearable filterable placeholder="选择球队">
             <el-option
-              v-for="item in teamList"
-              :key="item"
-              :label="item.name"
+              v-for="(item,index) in teamList"
+              :key="'team-'+index"
+              :label="item.teamName"
               :value="item.teamId"
             />
           </el-select>
         </el-form-item>
         <el-form-item label="司职位置">
-        <el-select v-model="queryForm.position" filterable clearable placeholder="请选择司职位置">
-          <el-option label="控球后卫(PG)" value="PG" />
-          <el-option label="得分后卫(SG)" value="SG" />
-          <el-option label="小前锋(SF)" value="SF" />
-          <el-option label="大前锋(PF)" value="PF" />
-          <el-option label="中锋(C)" value="C" />
-        </el-select>
-      </el-form-item>
+          <el-select v-model="queryForm.position" filterable clearable placeholder="请选择司职位置">
+            <el-option label="控球后卫(PG)" value="PG" />
+            <el-option label="得分后卫(SG)" value="SG" />
+            <el-option label="小前锋(SF)" value="SF" />
+            <el-option label="大前锋(PF)" value="PF" />
+            <el-option label="中锋(C)" value="C" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="球员">
-          <el-input
-            style="font-size:17px;"
-            clearable
-            placeholder="输入球员姓名"
-            v-model="queryForm.playerName"
-          ></el-input>
+          <el-input style="font-size:17px;" clearable placeholder="输入球员姓名" v-model="queryForm.name"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button style="margin-left:15px;" type="primary" @click="query()">查 询</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="playerTable" style="width: 100%">
-        <el-table-column prop="date" width="80">
+      <el-table v-loading="loading" :data="playerData.data" style="width: 100%">
+        <el-table-column width="80">
           <template slot-scope="scope">
-            <el-link href="https://element.eleme.io" target="_blank" :underline="false">
+            <el-link href="/" target="_blank" :underline="false">
               <el-avatar
                 style="background-color:#fff;"
                 :size="55"
-                :src="'team/' + playerTable[scope.$index].playerId +'.png'"
+                :src="'team/' + playerData.data[scope.$index].playerId +'.png'"
               />
             </el-link>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="姓名" />
-         <el-table-column prop="teamName" label="球队" />
+        <el-table-column prop="teamName" label="球队" />
         <el-table-column prop="number" label="号码" />
         <el-table-column prop="brith" label="出生日期" />
         <el-table-column prop="age" label="年龄" />
@@ -103,10 +97,10 @@
           <el-form-item label="交易至" prop="awayId">
             <el-select v-model="dealForm.awayId" clearable placeholder="请选择球队">
               <el-option
-                v-for=" item in teamList"
-                :key="item"
-                :disabled="item.teamId === playerTable[selectPlayer].teamId"
-                :label="item.name"
+                v-for="(item,index) in teamList"
+                :key="'to-team-'+index"
+                :disabled="item.teamId === playerData.data[selectPlayer].teamId"
+                :label="item.teamName"
                 :value="item.teamId"
               />
             </el-select>
@@ -128,8 +122,9 @@
         @prev-click="handlePreChange"
         @next-click="handleNextChange"
         :hide-on-single-page="true"
+        :current-page.sync="queryForm.page"
         layout="total,prev, pager, next,jumper"
-        :total="count"
+        :total="playerData.count"
         :page-size="10"
       />
     </el-card>
@@ -141,7 +136,9 @@
  */
 import editTeam from '@/components/others/editTeam.vue'
 import editPlayer from '@/components/others/editPlayer.vue'
-import { validManagerPlayerList, validManagerTeamList } from '@/utils/validate'
+import { getTeamList } from '@/api/global'
+import { queryPlayers } from '@/api/manager'
+import { validManagerPlayerList } from '@/utils/validate'
 export default {
   components: {
     editTeam,
@@ -149,7 +146,6 @@ export default {
   },
   data() {
     const playerList = validManagerPlayerList()
-    const teamList_ = validManagerTeamList()
     return {
       //base
       loading: false,
@@ -157,15 +153,20 @@ export default {
       dialogDealPlayer: false,
       radioSelect: '解约',
       selectPlayer: 0, // 选中为球员的下标
+      baseUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
       //data
-      playerTable: playerList,
-      teamList: teamList_,
-      count: 100,
+      teamList: [],
+      playerData: {
+        count: 100,
+        data: playerList,
+      },
       queryForm: {
         // 查询提交表单
-        playerName: '',
-        team: '',
-        position:'',
+        name: '',
+        teamId: '',
+        position: '',
+        page: 0,
+        pageSize: 10,
       },
       playerForm: {
         playerId: '',
@@ -180,18 +181,52 @@ export default {
       dealForm: {
         homeId: '',
         awayId: '',
+        playerId: '',
       },
       dealRules: {
         awayId: [{ required: true, message: '请输入选择球队' }],
       },
     }
   },
+  created() {
+    getTeamList().then((res) => {
+      this.teamList = res.data.data
+    })
+  },
   methods: {
+    handleCurrentChange() {
+      this.loading = true
+      this.query()
+    },
+    handlePreChange() {
+      this.queryForm.page -= 1
+      this.loading = true
+      this.query()
+    },
+    handleNextChange() {
+      this.queryForm.page += 1
+      this.loading = true
+      this.query()
+    },
     query() {
-      this.$message('茶轩')
+      this.loading = true
+      queryPlayers(this.queryForm)
+        .then((qs) => {
+          this.playerData = qs.data
+          this.loading = false
+          this.$notify({
+            title: '查询提示',
+            message: '查询结果返回成功,共计' + qs.data.count + '条结果',
+            type: 'success',
+            duration: 1700,
+          })
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     handleEditPlayer(index) {
-      this.playerForm = this.playerTable[index]
+      this.playerForm = this.playerData.data[index]
       this.$refs.editPlayerForm.setForm(this.playerForm)
     },
     handleClosePlayer(done) {
@@ -199,31 +234,34 @@ export default {
         .then((_) => {
           done()
         })
-        .catch((_) => {})
     },
     submitDealPlayer() {
-      if (this.radioSelect === '解约') this.$message('解约')
-      else if (this.radioSelect === '退役') this.$message('退役')
-      else {
+      var sign = true
+      this.dealForm.playerId = this.playerData.data[this.selectPlayer].playerId
+      if (this.radioSelect === '解约') {
+        this.dealForm.dealType = 0 //解约
+      } else if (this.radioSelect === '退役') {
+        this.dealForm.dealType = 1 //退役
+      } else {
         this.$refs['dealPlayerForm'].validate((valid) => {
           if (valid) {
-            this.$message('交易')
+            this.dealForm.dealType = 2 //交易
           } else {
-            this.$message('交易error')
-            return false
+            sign = false
           }
         })
       }
-    },
-    handleCurrentChange() {
-      this.loading = false
-      this.$message('now----------')
-    },
-    handlePreChange() {
-      this.$message('pre------------')
-    },
-    handleNextChange() {
-      this.$message('next-------------')
+      if (sign) {
+        this.$confirm('确定执行该操作吗?').then((_) => {
+          this.$notify({
+            title: '操作提示',
+            message: '操作成功',
+            type: 'success',
+            duration: 1700,
+          })
+          this.dialogDealPlayer = false
+        })
+      }
     },
   },
 }

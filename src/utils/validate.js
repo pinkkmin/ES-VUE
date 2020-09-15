@@ -1373,6 +1373,208 @@ export function validUserList() {
   }
   return userList
 }
+export function validAddMatchData() {
+  const  home = [
+    {
+      playerId: '12548',
+      name: '陈明贵',
+      number: 15,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+    {
+      playerId: '1212548',
+      name: '刘树生',
+      number: 5,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+    {
+      playerId: '1253448',
+      name: '利阿里',
+      number: 25,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+  ]
+  const  away = [
+    {
+      playerId: '2548',
+      name: '阿贵',
+      number: 18,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+    {
+      playerId: '12125',
+      name: '诸葛',
+      number: 9,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+    {
+      playerId: '125148',
+      name: '啊啊啊',
+      number: 25,
+      score: 0,
+      bound: 0,
+      assist: 0,
+      turnover: 0,
+      block: 0,
+      foul: 0,
+      time: 0,
+      steal: 0,
+      free: 0,
+      join: true,
+    },
+  ]
+  const match = {
+    count: 500,
+    data: [{
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020004',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020015',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 1
+        },
+        homeData: home,
+        awayData: away
+      },
+      {
+
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020001',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020007',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: home,
+        awayData: away
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020008',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 1
+        },
+        homeData: home,
+        awayData: away
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020011',
+            name: '掘金',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '湖人',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: home,
+        awayData: away
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020001',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: home,
+        awayData: away
+      },
+    ]
+  }
+  return match
+}
 export function validMatchList() {
   const matchData = validMatchData()
   const match = {
@@ -1482,6 +1684,115 @@ export function validMatchList() {
   }
   return match
 }
+export function validInputMatchList() {
+  const matchData = validMatchData()
+  const match = {
+    count: 500,
+    data: [{
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020001',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020014',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 1
+        },
+        homeData: matchData,
+        awayData: []
+      },
+      {
+
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020001',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020007',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: [],
+        awayData: []
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020008',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 1
+        },
+        homeData: [],
+        awayData: []
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020011',
+            name: '掘金',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '湖人',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: [],
+        awayData: []
+      },
+      {
+        match: {
+          season: '2020-2021',
+          matchId: 'dsds',
+          date: '2020-8-15 14:00',
+          home: {
+            teamId: 'cba2020001',
+            name: '开拓者',
+          },
+          away: {
+            teamId: 'cba2020004',
+            name: '掘金',
+          },
+          homeScore: 125,
+          awayScore: 114,
+          status: 0
+        },
+        homeData: '',
+        awayData: ''
+      },
+    ]
+  }
+  return match
+}
 export function validMatchData() {
   const match = [{
       playerId: 'cas',
@@ -1496,6 +1807,7 @@ export function validMatchData() {
       time: 32,
       steal: 2,
       free: 3,
+      join: true,
 
     },
     {
@@ -1511,6 +1823,7 @@ export function validMatchData() {
       time: 32,
       steal: 2,
       free: 3,
+      join: true,
 
     },
     {
@@ -1526,11 +1839,12 @@ export function validMatchData() {
       time: 32,
       steal: 2,
       free: 3,
+      join: true,
 
     },
     {
       playerId: 'casfdf',
-      name: '库里dfd发对方水电费斯蒂芬',
+      name: '库里dfd发斯蒂芬',
       number: 15,
       score: 15,
       bound: 4,
@@ -1541,8 +1855,66 @@ export function validMatchData() {
       time: 32,
       steal: 2,
       free: 3,
+      join: true,
 
     },
   ]
   return match
 }
+
+
+export function validTimeLine() {
+ const data =  [
+    {
+      timestamp: new Date(),
+      name: '扎克科林斯',
+      status: 1,
+      from: '',
+      to: '',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/1628380.png'
+    },
+    {
+      timestamp: new Date(),
+      name: '斯蒂芬库里',
+      status: 1,
+      from: '',
+      to: '',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201939.png'
+    },
+    {
+      timestamp: new Date(),
+      name: 'Cj麦科勒姆',
+      status: 1,
+      from: '',
+      to: '',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/203468.png'
+    },
+    {
+      timestamp: new Date(),
+      name: '卡梅伦安东尼',
+      status: 0,
+      from: '',
+      to: '',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/2546.png'
+    },
+    {
+      timestamp: new Date(),
+      name: '凯文杜兰特',
+      status: 2,
+      from: '金州勇士',
+      to: '篮网',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201142.png'
+    },
+    {
+      timestamp: new Date(),
+      name: '凯文杜兰特',
+      status: 3,
+      from: '金州勇士',
+      to: '篮网',
+      person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201142.png'
+    }
+  ]
+  return data
+}
+
+

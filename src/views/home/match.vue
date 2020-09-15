@@ -2,219 +2,171 @@
   <div>
     <el-card class="head">
       <span class="icon">
-        <i class="el-icon-trophy-1" style="font-size: 35px; color: #89177D" />
+        <i class="el-icon-trophy-1" style="margin-left:10px;font-size: 35px; color: #89177D" />
+        <span style="margin-left:18px;font-size:34px;color:#409EFF;">比赛中心</span>
       </span>
-      <span class="head-team">{{ team }}</span>
       <el-date-picker
-        v-model="date"
+        v-model="queryForm.month"
         type="month"
         class="picker"
         format="yyyy 年 MM 月"
         value-format="yyyy-MM"
-        placeholder="选择日期" />
-      <el-button class="button" plain @click="backToday">回到今天</el-button>
-        <el-select v-model="value" placeholder="请选择球队" style="width:140px;">
-          <el-option label="全部" value="all" style="height:40px;" />
-          <el-option
-            v-for="(item, index) in teamList" 
-            :key="index"
-            :label="item.name"
-            :value="item.name"
-            style="height:52px;"
-          >
-          <el-avatar :size="38" :src="item.icon" />
-          <span style="font-size=18px;">{{ item.name }}</span>
-          </el-option>
-        </el-select>                  
+        placeholder="选择日期"
+      />
+      <el-button class="button" type="primary " plain @click="backToday">最近比赛</el-button>
     </el-card>
-    <div class="match-main">
-      <el-card v-for="i in count" :key="i" class="match-box-card">
-          <div slot="header">
-            <span>{{ macthDate[i-1].month }}月</span>
-          </div>
-          <el-table
-            :data="macthDate[i-1].data"
-            stripe
-            :show-header="false"
-            style="width: 100%"
-          >
-            <el-table-column prop="date" label="  日期" width="150" />
-            <el-table-column prop="status" label="状态" width="100" />
-            <el-table-column prop="away_icon" label="" width="170">
-              <el-avatar :size="55" :fit="cover" :src="getIcon()" />
-            </el-table-column>
-            <el-table-column prop="away_name" label="客队" width="120" />
-            <el-table-column prop="score" label="比分" width="150" />
-            <el-table-column prop="home_icon" label="" width="170">
-              <el-avatar :size="55" :fit="cover" :src="home_icon" />
-            </el-table-column>
-            <el-table-column prop="home_name" label="主队" width="120" />
-            <el-table-column prop="data" label="数据统计" width="170">
-              <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
-            </el-table-column>
-          </el-table>
-        </el-card>
-    </div>
+    <el-card
+      v-loading="loading"
+      v-for="(item,index) in matchList"
+      :key="'match-'+index"
+      style="margin-bottom:10px;"
+    >
+      <div slot="header">
+        <span class="match-span" style="font-size:20px;">{{ item.day }}日</span>
+      </div>
+      <el-table :data="item.data" stripe :show-header="false" style="width: 100%">
+        <el-table-column prop="date" label="日期" />
+        <el-table-column label="状态">
+          <template scope="scope">
+            <span v-if="item.data[scope.$index].status === '1'">已结束</span>
+            <span v-else-if="item.data[scope.$index].status === '0'">已结束</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="awayId">
+          <template slot-scope="scope">
+            <el-avatar
+              style="background-color:#fff;"
+              :size="65"
+              :src="'team/' + item.data[scope.$index].awayId+ '.png'"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="awayName">
+          <template slot-scope="scope">
+            <span style="font-size:16px;font-weight: bolder;">{{item.data[scope.$index].awayName}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="比分">
+          <template slot-scope="scope">
+            <span class="match-span">
+              <span
+                v-if="item.data[scope.$index].homeScore>item.data[scope.$index].awayScore"
+              >{{item.data[scope.$index].homeScore}}</span>
+              <span v-else style="color:#7D7B73;">{{item.data[scope.$index].homeScore}}</span>
+              -
+              <span
+                v-if="item.data[scope.$index].homeScore<item.data[scope.$index].awayScore"
+              >{{item.data[scope.$index].awayScore}}</span>
+              <span v-else style="color:#7D7B73;">{{item.data[scope.$index].awayScore}}</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="homeName">
+          <template slot-scope="scope">
+            <span style="font-size:16px;font-weight: bolder;">{{item.data[scope.$index].homeName}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="homeId">
+          <template slot-scope="scope">
+            <el-avatar
+              style="background-color:#fff;"
+              :size="65"
+              :src="'team/' + item.data[scope.$index].homeId+ '.png'"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="data" label="数据统计">
+          <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 
 <script>
+import { getMatchsByDay, getCurSeason } from '@/api/global'
 export default {
- data() {
+  data() {
     return {
-       value: '',
-      teamList:  [{
-      name: '开拓者',
-      icon: 'https://mat1.gtimg.com/sports/nba/logo/new/22.png'// 实际上应该使用team_id 已team--id作为路由页面和头像路径
-    },
-    {
-      name: '掘金',
-      icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/20187.png'
-    },
-    {
-      name: '奇才',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/27.png'
-    },
-    {
-      name: '灰熊',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/29.png'
-    },
-    {
-      name: '小牛',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/6.png'
-    },
-    {
-      name: '太阳',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/21.png'
-    },
-    {
-      name: '湖人',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/13.png'
-    },
-    {
-      name: '凯尔特人',
-      icon:'https://mat1.gtimg.com/sports/nba/logo/1602/2.png'
-    },
-    {
-      name: '篮网',
-      icon: 'https://mat1.gtimg.com/sports/nba/logo/1602/17.png'
-    },
-     {
-      name: '猛龙',
-      icon: 'https://img1.gtimg.com/sports/pics/hv1/133/21/2268/147482188.png'
-    },
-     {
-      name: '马刺',
-      icon: 'https://img1.gtimg.com/sports/pics/hv1/231/116/2220/144385311.png'
-    },
-     {
-      name: '勇士',
-      icon: 'https://mat1.gtimg.com/sports/nba/logo/1602/9.png'
-    },
-     {
-      name: '森林狼',
-      icon: 'https://mat1.gtimg.com/sports/nba/logo/new/16.png'
-    },
-     {
-      name: '雷霆',
-      icon: 'https://mat1.gtimg.com/sports/nba/logo/1602/25.png'
-    }
-    ],
-    macthDate: [{
-        month: 4,
-        data: [
-          {
-            date: new Date().getMonth() + '月 ' + new Date().getDay() + ' 日 ' + new Date().getHours() + ':00',
-            away_name: '掘金',
-            home_name: '开拓者',
-            score: '124-110',
-            data: '测试',
-            status: '未开始',
-            away_icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/14.png',
-            home_icon: 'http://mat1.gtimg.com/sports/nba/logo/new/22.png'
-          },
-          {
-            date: new Date().getMonth() + '月 ' + new Date().getDay() + ' 日 ' + new Date().getHours() + ':00',
-            away_name: '掘金',
-            home_name: '开拓者',
-            score: '111-110',
-            status: '已结束',
-            away_icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/26.png',
-            home_icon: 'http://mat1.gtimg.com/sports/nba/logo/new/22.png'
-          }
-        ]
+      loading: true,
+      queryForm: {
+        month: '',
+        season: '',
       },
-      {
-        month: 5,
-        data: [
-          {
-            date: new Date().getMonth() + '月 ' + new Date().getDay() + ' 日 ' + new Date().getHours() + ':00',
-            away_name: '掘金',
-            home_name: '开拓者',
-            score: '124-110',
-            status: '已结束',
-            away_icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/14.png',
-            home_icon: 'http://mat1.gtimg.com/sports/nba/logo/new/22.png'
-          },
-          {
-            date: new Date().getMonth() + '月 ' + new Date().getDay() + ' 日 ' + new Date().getHours() + ':00',
-            away_name: '爵士',
-            home_name: '开拓者',
-            score: '111-110',
-            status: '已结束',
-            away_icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/26.png',
-            home_icon: 'http://mat1.gtimg.com/sports/nba/logo/new/22.png'
-          },
-          {
-            date: new Date().getMonth() + '月 ' + new Date().getDay() + ' 日 ' + new Date().getHours() + ':00',
-            away_name: '掘金',
-            home_name: '开拓者',
-            score: '101-110',
-            status: '已结束',
-            away_icon: 'http://mat1.gtimg.com/sports/nba/logo/1602/27.png',
-            home_icon: 'http://mat1.gtimg.com/sports/nba/logo/new/22.png'
-          }
-        ]
-      }
-      ]
-  }
+      matchList: [],
+    }
+  },
+  created() {
+    var now = new Date().toLocaleDateString()
+    var ym = now.split('/')
+    this.queryForm.month = ym[0] + '-' + ym[1]
+    getCurSeason().then((res) => {
+      this.queryForm.season = res.data.season
+      this.getMatchList()
+    })
+  },
+  watch: {
+    'queryForm.month': {
+      handler(newValue, oldValue) {
+        if (this.queryForm.season !== '' && this.queryForm.month!==null) this.getMatchList()
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   methods: {
-
-  }
+    getMatchList() {
+      getMatchsByDay(this.queryForm)
+        .then((res) => {
+          this.matchList = res.data
+          this.$notify({
+            title: '编辑提示',
+            message: res.message,
+            type: 'success',
+            duration: 1700,
+          })
+          this.loading = false
+        })
+        .catch(() => {})
+    },
+    backToday() {
+      this.getMatchList()
+    },
+  },
 }
 </script>
 
 <style lang="scss">
-.head{
-    width: 100%;
-    height:65px;
-    margin-bottom: 10px;
-    background: url(//mat1.gtimg.com/sports/images/img_r/behindli/nbaschedule/headline_icon.png) no-repeat 0 0;
-    .icon{
-        float: left;
-    }
-    .head-team {
-     margin-left: 15px;
-     font-size: 25px;
-    }
-    .text{
-        color: red;
-        font-size: 27px;
-        text-align: center;
-        margin-left: 32%;
-        float: center;
-    }
-  }
-  .picker{
-      width: 20px;
-      float: right;
-  }
-  .button{
-      margin-right: 10px;
-      float: right;
-  }
-.match-main{
+.head {
+  width: 100%;
+  height: 75px;
+  margin-bottom: 10px;
+  background: url(//mat1.gtimg.com/sports/images/img_r/behindli/nbaschedule/headline_icon.png)
+    no-repeat 0 0;
+  .icon {
     float: left;
+  }
+  .head-team {
+    margin-left: 15px;
+    font-size: 25px;
+  }
+  .text {
+    color: red;
+    font-size: 27px;
+    text-align: center;
+    margin-left: 32%;
+    float: center;
+  }
+}
+.picker {
+  width: 20px;
+  float: right;
+}
+.button {
+  margin-right: 10px;
+  float: right;
+}
+.match-main {
+  float: left;
 }
 </style>

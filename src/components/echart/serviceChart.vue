@@ -9,6 +9,8 @@
 export default {
   name: 'service_app',
   props: {
+    width:'',
+    height:'',
     serviceData: ''
   },
    data() {

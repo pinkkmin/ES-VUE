@@ -7,8 +7,8 @@
       <el-form-item label="主队" prop="home">
         <el-select v-model="editForm.home" clearable filterable placeholder="请选择主队">
           <el-option
-            v-for="item in teamList"
-            :key="item.teamName"
+            v-for="(item,index) in teamList"
+            :key="'home'+index"
             :label="item.teamName"
             :value="item.teamId"
           />
@@ -17,8 +17,8 @@
       <el-form-item label="客队" prop="away">
         <el-select v-model="editForm.away" clearable filterable placeholder="请选择客队">
           <el-option
-            v-for="item in teamList"
-            :key="item.teamName"
+            v-for="(item,index) in teamList"
+            :key="'away-'+index"
             :label="item.teamName"
             :value="item.teamId"
           />
@@ -55,6 +55,7 @@
   </div>
 </template>
 <script>
+import { getTeamList } from '@/api/global'
 export default {
   props: {
     data: {
@@ -79,38 +80,10 @@ export default {
     },
   },
   data() {
-    const team = [
-      {
-        teamName: '开拓者',
-        teamId: 'cba124545',
-      },
-      {
-        teamName: '掘金',
-        teamId: 'cba455',
-      },
-      {
-        teamName: '爵士',
-        teamId: 'cba1545',
-      },
-    ]
-    const player_ = [
-      {
-        playerId: '12324',
-        playerName: '利拉德',
-      },
-      {
-        playerId: '12224',
-        playerName: '拉德',
-      },
-      {
-        playerId: '12323224',
-        playerName: '利德',
-      },
-    ]
     return {
       elId: '',
-      teamList: team,
-      playerList: player_,
+      teamList: [],
+      playerList: [],
       editForm: {
         // 编辑公告提交表单
         noticeId: '',
@@ -147,45 +120,43 @@ export default {
       },
     }
   },
+  watch: {
+    data: {
+      handler(newValue, oldValue) {
+        this.editForm = this.data
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
-    this.setForm(this.data)
+    getTeamList().then((res) => {
+      this.teamList = res.data.data
+    })
   },
   methods: {
-    getTeamName(value) {
-      var index = 0
-      while (index < this.teamList.length) {
-        if (this.teamList[index].teamId === value)
-          return this.teamList[index].teamName
-        index++
-      }
-      return '球队1'
-    },
-    getPlayerName(value) {
-      var index = 0
-      while (index < this.playerList.length) {
-        if (this.playerList[index].playerId === value)
-          return this.playerList[index].playerName
-        index++
-      }
-      return '球员甲'
-    },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          this.$notify({
+            title: '编辑提示',
+            message: '编辑成功',
+            type: 'success',
+            duration: 1700,
+          })
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    setForm(data) {
-     this.editForm = Object.assign({}, data) 
-    },
-    resetForm() {
-      this.editForm = {}
-    },
+    // setForm(data) {
+    //  this.editForm = Object.assign({}, data)
+    // },
+    // resetForm() {
+    //   this.editForm = {}
+    // },
   },
 }
 </script>

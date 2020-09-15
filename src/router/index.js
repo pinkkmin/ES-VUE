@@ -6,8 +6,7 @@ Vue.use(Router)
 /* Layout */
 import Layout from '@/layout'
 
-export const constantRoutes = [
-  {
+export const constantRoutes = [{
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
@@ -31,8 +30,7 @@ export const constantRoutes = [
       hidden: true,
       component: () => import('@/views/home/index'),
       redirect: '/home/main',
-      children: [
-        {
+      children: [{
           path: 'main',
           name: 'main',
           hidden: true,
@@ -40,7 +38,7 @@ export const constantRoutes = [
         },
         {
           path: 'match',
-          name: 'match',
+          name: 'match_center',
           hidden: true,
           component: () => import('@/views/home/match'),
           meta: {
@@ -55,15 +53,6 @@ export const constantRoutes = [
           meta: {
             title: '球员中心'
           }
-        },
-        {
-          path: 'data',
-          name: 'data',
-          hidden: true,
-          component: () => import('@/views/home/data'),
-          meta: {
-            title: '数据中心'
-          }
         }
       ]
     }]
@@ -77,8 +66,7 @@ export const constantRoutes = [
       title: '后台管理',
       icon: 'user_manager'
     },
-    children: [
-      {
+    children: [{
         path: 'users',
         component: () => import('@/views/manager/mgUser'),
         name: 'Managers_users',
@@ -108,7 +96,7 @@ export const constantRoutes = [
       {
         path: 'match',
         component: () => import('@/views/manager/mgMatch'),
-        name: 'match',
+        name: 'mg_match',
         meta: {
           title: 'root-赛事管理',
           icon: 'mg_match'
@@ -126,9 +114,18 @@ export const constantRoutes = [
       {
         path: 'publish',
         component: () => import('@/views/manager/publish'),
-        name: 'notpublishice',
+        name: 'notice_publish',
         meta: {
           title: '发布公告',
+          icon: 'publish'
+        }
+      },
+      {
+        path: 'addMatchData',
+        component: () => import('@/views/manager/addMatchData'),
+        name: 'addMatchData',
+        meta: {
+          title: '录入赛事',
           icon: 'publish'
         }
       }
@@ -138,16 +135,15 @@ export const constantRoutes = [
     path: '/teams',
     component: Layout,
     redirect: '/teams/manager',
-    name: 'Nested',
+    name: 'team',
     meta: {
       title: '球队管理',
       icon: 'manager_player'
     },
-    children: [
-      {
+    children: [{
         path: 'manager',
         component: () => import('@/views/teams/manager'),
-        name: 'Manager',
+        name: 'manager_player',
         meta: {
           title: '球员管理',
           icon: 'manager_player'
@@ -194,66 +190,22 @@ export const constantRoutes = [
   {
     path: '/myteam',
     component: Layout,
-    meta: {
-      title: '我的主队',
-      icon: 'myteam'
-    },
     children: [{
-      path: '/',
+      path: '',
       name: 'myteam',
-      hidden: true,
-      component: () => import('@/views/myteam/index'),
       meta: {
-        title: '',
+        title: '我的主队',
         icon: 'myteam'
       },
-      redirect: '/myteam/team',
-      children: [
-        {
-          path: 'team',
-          name: 'team',
-          hidden: true,
-          component: () => import('@/views/myteam/team'),
-          meta: {
-            title: '阵容'
-          }
-        },
-        {
-          path: 'data',
-          name: 'data',
-          hidden: true,
-          component: () => import('@/views/myteam/data'),
-          meta: {
-            title: '数据中心'
-          }
-        },
-        {
-          path: 'match',
-          name: 'match',
-          hidden: true,
-          component: () => import('@/views/myteam/match'),
-          meta: {
-            title: '赛程'
-          }
-        },
-        {
-          path: 'person',
-          name: 'person',
-          hidden: true,
-          component: () => import('@/views/myteam/person'),
-          meta: {
-            title: '人员变动'
-          }
-        }
-      ]
+      component: () => import('@/views/myteam'),
     }]
   },
   {
-    path: '/user',
+    path: '/userInfo',
     component: Layout,
     children: [{
       path: 'index',
-      name: 'Form',
+      name: 'userInfo',
       component: () => import('@/views/user/userInfo'),
       meta: {
         title: '我的信息',
@@ -262,11 +214,11 @@ export const constantRoutes = [
     }]
   },
   {
-    path: '/user',
+    path: '/passwd',
     component: Layout,
     children: [{
-      path: 'passwd',
-      name: 'Form',
+      path: 'index',
+      name: 'passwd',
       component: () => import('@/views/user/passwd'),
       meta: {
         title: '修改密码',
@@ -280,11 +232,10 @@ export const constantRoutes = [
     meta: {
       title: 'public'
     },
-    children: [
-      {
+    children: [{
         path: 'team',
         component: () => import('@/views/public/team'),
-        name: 'team',
+        name: 'public_team',
         meta: {
           title: '球队'
         }
@@ -292,7 +243,7 @@ export const constantRoutes = [
       {
         path: 'player',
         component: () => import('@/views/public/player'),
-        name: 'player',
+        name: 'public_player',
         meta: {
           title: '球员'
         }
@@ -300,7 +251,7 @@ export const constantRoutes = [
       {
         path: 'match',
         component: () => import('@/views/public/match'),
-        name: 'match',
+        name: 'public_match',
         meta: {
           title: '赛事'
         }

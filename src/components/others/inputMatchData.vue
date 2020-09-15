@@ -20,15 +20,24 @@
       <el-table-column prop="turnOver" label="失误" />
       <el-table-column prop="foul" label="犯规" />
       <el-table-column prop="free" label="罚球" />
-      <el-table-column label="编 辑 操 作">
+      <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button
-            size="small"
+            size="mini"
             round
             style="float：left;"
             type="primary"
-            @click="dialog=true, handleEditMatchData(scope.$index)"
-          >编 辑</el-button>
+            @click="dialog=true, isHome=true,editIndex = scope.$index,handleEditMatchData()"
+          >录 入</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否上场" width="100px">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="homeTableData[scope.$index].join"
+            active-text="是"
+            active-color="#13ce66"
+          />
         </template>
       </el-table-column>
     </el-table>
@@ -45,20 +54,25 @@
       <el-table-column prop="turnOver" label="失误" />
       <el-table-column prop="foul" label="犯规" />
       <el-table-column prop="free" label="罚球" />
-      <el-table-column label="操 作">
+      <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button
             type="success"
-            size="small"
+            size="mini"
             round
             style="float：left;"
-            @click="dialog=true, handleEditMatchData(scope.$index)"
-          >编 辑</el-button>
+            @click="dialog=true, isHome=false,editIndex = scope.$index,handleEditMatchData()"
+          >录 入</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否上场" width="100px">
+        <template slot-scope="scope">
+          <el-switch v-model="awayTableData[scope.$index].join" active-text="是"></el-switch>
         </template>
       </el-table-column>
     </el-table>
     <el-dialog title="赛事数据管理-编辑" :visible.sync="dialog" :before-close="handleClose">
-      <el-form :model="editForm" :rules="rules" ref="editForm">
+      <el-form :model="editForm" ref="editForm">
         <el-form-item label="上场时间">
           <el-col :span="21">
             <el-slider v-model="editForm.time" show-input />
@@ -91,7 +105,7 @@
         </el-form-item>
         <el-form-item label="失误">
           <el-col :span="21">
-            <el-slider v-model="editForm.turnOver" :min="0" :max="25" show-input />
+            <el-slider v-model="editForm.turnover" :min="0" :max="25" show-input />
           </el-col>
         </el-form-item>
         <el-form-item label="犯规">
@@ -109,7 +123,7 @@
             round
             style="float:right;margin-right:10px;"
             type="success"
-            @click="submitForm('editUserForm')"
+            @click="submitForm('editForm')"
           >提 交</el-button>
         </el-form-item>
       </el-form>
@@ -121,6 +135,7 @@
 export default {
   props: {
     matchId: '',
+    updateLoading: false,
     data: {
       match: {
         season: '',
@@ -139,7 +154,7 @@ export default {
         status: 0,
       },
       homeData: '',
-      awayData: ''
+      awayData: '',
     },
   },
   data() {
@@ -147,19 +162,22 @@ export default {
       dialog: false,
       homeTableData: this.data.homeData,
       awayTableData: this.data.awayData,
+      editIndex: 0, //编辑球员的index
+      isHome: true, // 编辑 主队球员、客队球员
       editForm: {
+        // 录入球员的比赛数据
         matchId: '',
         playerId: '',
-        number: '',
-        socre: '',
-        bound: '',
-        assist: '',
-        turnOver: '',
-        block: '',
-        foul: '',
-        time: '',
-        steal: '',
-        free: '',
+        number: 0,
+        socre: 0,
+        bound: 0,
+        assist: 0,
+        turnover: 0,
+        block: 0,
+        foul: 0,
+        time: 0,
+        steal: 0,
+        free: 0,
       },
     }
   },
@@ -171,8 +189,15 @@ export default {
         })
         .catch((_) => {})
     },
-    handleEditMatchData(index) {},
+    handleEditMatchData() {
+       if (this.isHome)
+        this.editForm = Object.assign({}, this.homeTableData[this.editIndex])
+       else
+      this.editForm = Object.assign({}, this.awayTableData[this.editIndex])
+    },
     submitForm(formName) {
+      // console.log(this.homeTableData)
+      // console.log(this.awayTableData)
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$confirm('确认提交, 是否继续?', '提示', {
@@ -181,15 +206,22 @@ export default {
             type: 'warning',
           })
             .then((_) => {
+              if (this.isHome)
+        this.homeTableData[this.editIndex] = Object.assign({}, this.editForm)
+      else this.awayTableData[this.editIndex] = Object.assign({}, this.editForm)
+      // console.log("-------------------")
+      // console.log(this.homeTableData)
+      // console.log(this.awayTableData)
               this.$notify({
                 title: '提示',
-                message: '修改成功',
+                message: '录入-数据已改变,请提交',
                 duration: 1000,
               })
               this.dialog = false
             })
             .catch((_) => {})
-        } else {  
+        } else {
+          console.log('error submit!!')
           return false
         }
       })

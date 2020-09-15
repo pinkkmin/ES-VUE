@@ -1,4 +1,5 @@
 <template>
+   <el-card style="margin:10px 10px 10px 10px;">
   <div class="passwd-container">
       <el-form ref="Form" :model="form" :rules="Rules"  auto-complete="on">
       <el-form-item class="oldPasswd" prop="password" label=" 旧密码  :" >
@@ -11,7 +12,6 @@
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-
         <el-form-item class = "newPasswd" prop="password" label=" 新密码  : " >
         <el-input
           :key="newType"
@@ -41,7 +41,6 @@
         <span class="show-pwd" @click="showAgainPwd">
           <svg-icon :icon-class="againType === 'password' ? 'eye' : 'eye-open'" />
         </span>
-
       </el-form-item>
       <el-form-item class="button">
          <el-button  type="success" round plain @click="onReSet" icon="el-icon-refresh-left" >重置</el-button>
@@ -49,6 +48,7 @@
       </el-form-item>
     </el-form>
   </div>
+   </el-card>
 </template>
 
 <script>

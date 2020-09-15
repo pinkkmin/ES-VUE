@@ -1,3 +1,7 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-10 10:30:52
+-->
 <template>
   <div :id="elId" style="width:100%;">
     <el-table
@@ -8,7 +12,7 @@
       <el-table-column prop="homeNumber" label width="260">
         <template slot-scope="scope">
           <el-progress
-            v-if="countData[scope.$index].homeValue >= countData[scope.$index].awayValue"
+            v-if="countData[scope.$index].homeValue > countData[scope.$index].awayValue"
             :show-text="false"
             :stroke-width="23"
             :percentage="100*countData[scope.$index].homeValue/(countData[scope.$index].homeValue+countData[scope.$index].awayValue)"
@@ -55,8 +59,17 @@ export default {
   data() {
     return {
       elId: '',
-      countData: this.data,
+      countData: [],
     }
+  },
+  watch: {
+    data: {
+      handler(newValue, oldValue) {
+        this.countData = this.data
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)

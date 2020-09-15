@@ -1,8 +1,8 @@
 <template>
   <div :id="elId">
     <el-form :model="editForm" :rules="rules" ref="editForm" label-width="100px">
-      <el-form-item label="队名" prop="name">
-        <el-input style="font-size:17px;" placeholder="输入队名" v-model="editForm.name"></el-input>
+      <el-form-item label="队名" prop="teamName">
+        <el-input style="font-size:17px;" placeholder="输入队名" v-model="editForm.teamName"></el-input>
       </el-form-item>
       <el-form-item label="主教练" prop="coach">
         <el-input style="font-size:17px;" placeholder="输入主教练" v-model="editForm.coach"></el-input>
@@ -33,7 +33,7 @@ export default {
     title: '',
     data: {
       teamId: '',
-      name: '',
+      teamName: '',
       coach: '',
       city: '',
       home: '',
@@ -45,14 +45,14 @@ export default {
       elId: '',
       editForm: {
         teamId: '',
-        name: '',
+        teamName: '',
         coach: '',
         city: '',
         home: '',
         club: '',
       },
       rules: {
-        name: [
+        teamName: [
           { required: true, message: '请输入正确内容' },
           {
             min: 3,

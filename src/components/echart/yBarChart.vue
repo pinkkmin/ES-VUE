@@ -1,3 +1,7 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-06 16:25:45
+-->
 <template>
   <div>
     <div :id="elId" style="width: 580px;height:500px;" />
@@ -16,6 +20,17 @@ export default {
     return {
       elId: '',
     }
+  },
+  watch: {
+    data: {
+      deep: true,
+      immediate: true,
+      handler: function (newValue, oldValue) {
+        if (this.elId != '') {
+          this.drawChart()
+        }
+      },
+    },
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
@@ -61,10 +76,7 @@ export default {
       })
       myChart.setOption(option)
     },
-  },
-  mounted() {
-    this.drawChart()
-  },
+  }
 }
 </script>
 <style>

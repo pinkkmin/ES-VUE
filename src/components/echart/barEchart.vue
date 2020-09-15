@@ -4,22 +4,41 @@
 -->
 <template>
   <div>
-    <div id="bar_app">
-      <div id="main_" style="width: 580px;height:500px;" />
-    </div>
+    <div :id="elId" style="width: 580px;height:500px;" />
   </div>
 </template>
 <script>
 export default {
-  name: 'bar_app',
   props: {
     barData: '',
   },
+  data() {
+    return {
+      elId: '',
+      chart: '',
+    }
+  },
+  watch: {
+    barData: {
+      deep: true,
+      immediate: true,
+      handler: function (newValue, oldValue) {
+        if (this.elId != '') {
+          if (this.chart) this.setChart()
+          else this.initChart()
+        }
+      },
+    },
+  },
+  created() {
+    this.elId = Math.random().toString(36).slice(-8)
+  },
   methods: {
-    drawChart() {
-      // 基于准备好的dom，初始化echarts实例
-      let myChart = this.$echarts.init(document.getElementById('main_'))
-      // 指定图表的配置项和数据
+    initChart() {
+      this.chart = this.$echarts.init(document.getElementById(this.elId))
+      this.setChart()
+    },
+    setChart() {
       let option = {
         color: ['#37A2DA', '#32C5E9', '#FFDB5C'],
         title: {
@@ -70,11 +89,11 @@ export default {
           },
         ],
       }
-      myChart.setOption(option)
+      this.chart.setOption(option)
     },
   },
   mounted() {
-    this.drawChart()
+    this.initChart()
   },
 }
 </script>

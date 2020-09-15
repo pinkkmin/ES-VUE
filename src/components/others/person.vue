@@ -1,5 +1,9 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-28 19:55:59
+-->
 <template>
-  <div class="block">
+  <div class="block" :id="elId">
     <el-timeline>
       <el-timeline-item
         v-for="(item, index) in data"
@@ -15,7 +19,7 @@
           <div class="card-person">
             <div class="link-person">
               <el-link href="https://element.eleme.cn" target="_blank" :underline="false">
-                <el-avatar :size="55" :fit="cover" :src="item.person" />
+                <el-avatar :size="55" :src="item.person" />
               </el-link>
             </div>
             <div class="msg-person">
@@ -29,8 +33,12 @@
 </template>
 <script>
 export default {
+    props: {
+    timeLine: '',
+  },
   data() {
     return {
+        elId:'',
       iconGroup: [
         {
           icon: 'el-icon-basketball'
@@ -60,57 +68,11 @@ export default {
           icon: 'el-icon-lollipop'
         }
       ],
-      data: [
-        {
-          timestamp: new Date(),
-          name: '扎克科林斯',
-          status: 1,
-          from: '',
-          to: '',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/1628380.png'
-        },
-        {
-          timestamp: new Date(),
-          name: '斯蒂芬库里',
-          status: 1,
-          from: '',
-          to: '',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201939.png'
-        },
-        {
-          timestamp: new Date(),
-          name: 'Cj麦科勒姆',
-          status: 1,
-          from: '',
-          to: '',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/203468.png'
-        },
-        {
-          timestamp: new Date(),
-          name: '卡梅伦安东尼',
-          status: 0,
-          from: '',
-          to: '',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/2546.png'
-        },
-        {
-          timestamp: new Date(),
-          name: '凯文杜兰特',
-          status: 2,
-          from: '金州勇士',
-          to: '篮网',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201142.png'
-        },
-        {
-          timestamp: new Date(),
-          name: '凯文杜兰特',
-          status: 3,
-          from: '金州勇士',
-          to: '篮网',
-          person: 'https://nba.sports.qq.com/media/img/players/head/260x190/201142.png'
-        }
-      ]
+      data: this.timeLine
     }
+  },
+   created() {
+    this.elId = Math.random().toString(36).slice(-8)
   },
   methods: {
     getSatus(item) {

@@ -4,7 +4,7 @@
 -->
 <template>
   <div>
-    <div :id="elId" style="width:580px;height:300px;" />
+    <div :id="elId" style="width:600px;height:300px;" />
   </div>
 </template>
 <script>
@@ -13,24 +13,43 @@ export default {
   props: {
     baseLineData: '',
     show: '',
-    title_: ''
+    title_: '',
+    getName:'',
+    lostName:'',
   },
   data() {
     return {
       elId: '',
+      chart: '',
+      data: {},
     }
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
   },
+  watch: {
+    baseLineData: {
+      deep: true,
+      immediate: true,
+      handler: function (newValue, oldValue) {
+        this.data = this.baseLineData
+        if (this.elId != '') {
+          if (!this.chart) {
+            this.initChart()
+          }
+          this.setOption()
+        }
+      },
+    },
+  },
   methods: {
-    drawChart() {
-      // 基于准备好的dom，初始化echarts实例
-      let myChart = this.$echarts.init(document.getElementById(this.elId))
-      // 指定图表的配置项和数据
+    setOption() {
+      var getName = '得分', lostName = '失分'
+      if(this.lostName != null)  lostName = this.lostName
+       if(this.getName != null)   getName = this.getName
       let option = {
         title: {
-          text: this.title_ + this.baseLineData.win + '胜' + this.baseLineData.fail + '负',
+          text: this.title_ + this.data.win + '胜' + this.data.fail + '负',
         },
         tooltip: {
           trigger: 'axis',
@@ -38,7 +57,7 @@ export default {
         legend: {},
         xAxis: {
           type: 'category',
-          data: this.baseLineData.date,
+          data: this.data.date,
         },
         yAxis: {
           type: '',
@@ -49,9 +68,9 @@ export default {
         },
         series: [
           {
-            name: '得分',
-             color: '#2ec7c9',
-            data: this.baseLineData.getData,
+            name: getName,
+            color: '#2ec7c9',
+            data: this.data.getData,
             type: 'line',
             seriesLayoutBy: 'row',
             label: {
@@ -59,10 +78,10 @@ export default {
               position: 'top',
             },
           },
-           {
-            name: '失分',
+          {
+            name: lostName,
             color: '#f23e65',
-            data: this.baseLineData.lostData,
+            data: this.data.lostData,
             type: 'line',
             seriesLayoutBy: 'row',
             label: {
@@ -72,11 +91,13 @@ export default {
           },
         ],
       }
-      myChart.setOption(option)
+      this.chart.setOption(option, true)
     },
-  },
-  mounted() {
-    this.drawChart()
+    initChart() {
+      // 基于准备好的dom，初始化echarts实例
+      this.chart = this.$echarts.init(document.getElementById(this.elId))
+      // 指定图表的配置项和数据
+    },
   },
 }
 </script>

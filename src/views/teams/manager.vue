@@ -9,7 +9,7 @@
         ></el-image>
       </div>
       <div style="float:left;margin-left:20px;">
-        <div style="color: #2ec7ee;font-size:30px;font-weight: bolder;">{{ team.name }}</div>
+        <div style="color: #2ec7ee;font-size:30px;font-weight: bolder;">{{ team.teamName }}</div>
         <ul style="list-style: none;margin-left:-13%;">
           <li>
             <span style="font-size:20px;">教练:</span>
@@ -129,6 +129,8 @@
  */
 import editTeam from '@/components/others/editTeam.vue'
 import editPlayer from '@/components/others/editPlayer.vue'
+import { getCurSeason } from '@/api/global'
+import { getTeamInfo } from '@/api/team'
 import { validManagerPlayerList, validManagerTeamList } from '@/utils/validate'
 export default {
   components: {
@@ -142,16 +144,17 @@ export default {
       dialogVisible: false,
       dialogPlayer: false,
       dialogDealPlayer: false,
+      teamId:'cba2020019',
       playerTable: playerList,
       teamList: teamList_,
       radioSelect: '解约',
       team: {
         teamId: 'cba2020019',
-        name: '山东王者',
-        coach: '巩晓彬',
-        city: '山西太原',
-        home: '青岛国信体育中心钻石体育馆',
-        club: '北京控股紫禁勇士俱乐部',
+        teamName: '',
+        coach: '',
+        city: '',
+        home: '',
+        club: '',
       },
       playerForm: {
         playerId: '',
@@ -173,6 +176,18 @@ export default {
         awayId: [{ required: true, message: '请输入选择球队' }],
       },
     }
+  },
+  created() {
+     getCurSeason().then((res) => {
+        var parse = res.data
+        parse.teamId = this.teamId
+        this.info = Object.assign({}, parse)
+        getTeamInfo(parse).then((res)=>{
+        this.team = res.data
+        console.log(this.team)
+        })
+        this.loading = false
+      })
   },
   methods: {
     handleEdit() {

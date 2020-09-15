@@ -1,216 +1,102 @@
 <template>
-  <div :id="elId">
-    <div>
-      <ul v-infinite-scroll="load" class="infinite-list">
-        <el-card class="head">
-          <span class="icon">
-            <i class="el-icon-trophy-1" style="font-size: 35px; color: #89177D" />
-          </span>
-          <span class="head-team">{{ data.teamName }}</span>
-          <span class="text">{{ date }}</span>
-          <el-date-picker
-            v-model="date"
-            type="month"
-            class="picker"
-            format="yyyy 年 MM 月"
-            value-format="yyyy-MM"
-            placeholder="选择日期"
-          />
-          <el-button class="button" plain @click="backToday">回到本月</el-button>
-        </el-card>
-      </ul>
-    </div>
-    <div>
-      <ul v-infinite-scroll="load" v-infinite-scroll-disabled="disabled" class="list">
-        <el-card v-for="item in macthDate" :key="item" class="match-box-card">
-          <div slot="header">
-            <span>{{ item.month }}月</span>
-          </div>
-          <el-table :data="item.data" stripe :show-header="false" style="width: 100%">
-            <el-table-column prop="date" label="  日期" width="150" />
-            <el-table-column prop="status" label="状态" width="100" />
-            <el-table-column prop="awayId" label width="170">
-              <template slot-scope="scope">
-                <el-avatar
-                  :size="60"
-                  :fit="cover"
-                  :src="'team/' + item.data[scope.$index].awayId+ '.png'"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="awayName" label="客队" width="120" />
-            <el-table-column prop="score" label="比分" width="150" />
-            <el-table-column prop="homeId" label width="170">
-              <template slot-scope="scope">
-                <el-avatar :size="60" :src="'team/' + item.data[scope.$index].homeId+ '.png'" />
-              </template>
-            </el-table-column>
-            <el-table-column prop="homeName" label="主队" width="120" />
-            <el-table-column prop="data" label="数据统计" width="170">
-              <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </ul>
-    </div>
-    <p v-if="loading" style="margin-left: 50%;">
-      <i class="el-icon-loading" style="font-size: 30px;" />加载中...
-    </p>
-    <p v-if="noMore" style="margin-left: 50%;">
-      <i class="el-icon-lollipop" style="font-size: 30px;" />没有更多了
-    </p>
+  <div :id="elId" style="margin: 10px 10px 10px 10px ">
+    <el-card class="head">
+      <span class="icon">
+        <i class="el-icon-trophy-1" style="font-size: 35px; color: #89177D" />
+      </span>
+      <span class="head-team">{{ name }}</span>
+    </el-card>
+
+    <el-card v-for="(item,index) in macthDate" :key="'match-'+index" class="match-box-card">
+      <div slot="header">
+        <span class="match-span" style="font-size:20px;">{{ item.month }}月</span>
+      </div>
+      <el-table :data="item.data" stripe :show-header="false" style="width: 100%">
+        <el-table-column prop="date" label="日期" />
+        <el-table-column label="状态">
+          <template scope="scope">
+            <span v-if="item.data[scope.$index].status === '1'">已结束</span>
+            <span v-else-if="item.data[scope.$index].status === '0'">已结束</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="awayId">
+          <template slot-scope="scope">
+            <el-avatar
+              style="background-color:#fff;"
+              :size="65"
+              :src="'team/' + item.data[scope.$index].awayId+ '.png'"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="awayName">
+          <template slot-scope="scope">
+            <span style="font-size:16px;font-weight: bolder;">{{item.data[scope.$index].awayName}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="比分">
+          <template slot-scope="scope">
+            <span class="match-span">
+              <span
+                v-if="item.data[scope.$index].homeScore>item.data[scope.$index].awayScore"
+              >{{item.data[scope.$index].homeScore}}</span>
+              <span v-else style="color:#7D7B73;">{{item.data[scope.$index].homeScore}}</span>
+              -
+              <span
+                v-if="item.data[scope.$index].homeScore<item.data[scope.$index].awayScore"
+              >{{item.data[scope.$index].awayScore}}</span>
+              <span v-else style="color:#7D7B73;">{{item.data[scope.$index].awayScore}}</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="homeName">
+          <template slot-scope="scope">
+            <span style="font-size:16px;font-weight: bolder;">{{item.data[scope.$index].homeName}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="homeId">
+          <template slot-scope="scope">
+            <el-avatar
+              style="background-color:#fff;"
+              :size="65"
+              :src="'team/' + item.data[scope.$index].homeId+ '.png'"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="data" label="数据统计">
+          <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 <script>
-/** request API
- *  List [ListItem,ListItem......]
- *  ListItem:{ 
- *     month: 6,    int 月份
- *     data[item,item....]  对应月份的数据
- *   }
- *  item: {
- *      matchId: '',                  赛事Id(String)
- *      date: '2020年8月4日 14:30',   日期(String) 
- *      awayId: 'cba2020008',         客队Id(String)
-        homeId: 'cba2020015',         主队Id(String)
-        awayName: '掘金',             客队(String)
-        homeName: '开拓者',           主队(String)
-        score: '124-110',             比分(String)                
-        status: '未开始',              状态(String) 
-    }
-*/
 export default {
   //父组件传过的数据
   props: {
-    data: {
-      teamId: '',
-      teamName: '',
-    },
+    data: {},
+    name:''
   },
   data() {
     return {
       // base
       elId: '', // 随机的id 在create()时生成
-      count: 2,
-      loading: false,
-      date: new Date().getFullYear() + '-' + new Date().getMonth(),
-      macthDate: [
-        {
-          month: 4,
-          data: [
-            {
-              matchId: 'dsdsdsd323',
-              date:
-                new Date().getMonth() +
-                '月 ' +
-                new Date().getDay() +
-                ' 日 ' +
-                new Date().getHours() +
-                ':00',
-              awayName: '掘金',
-              homeName: '开拓者',
-              score: '124-110',
-              status: '未开始',
-              awayId: 'cba2020008',
-              homeId: 'cba2020015',
-            },
-            {
-              matchId: 'dsdsdsd323',
-              date:
-                new Date().getMonth() +
-                '月 ' +
-                new Date().getDay() +
-                ' 日 ' +
-                new Date().getHours() +
-                ':00',
-              awayName: '掘金',
-              homeName: '开拓者',
-              score: '111-110',
-              status: '已结束',
-              awayId: 'cba2020005',
-              homeId: 'cba2020015',
-            },
-          ],
-        },
-        {
-          month: 5,
-          data: [
-            {
-              matchId: 'dsdsdsd323',
-              date:
-                new Date().getMonth() +
-                '月 ' +
-                new Date().getDay() +
-                ' 日 ' +
-                new Date().getHours() +
-                ':00',
-              awayName: '掘金',
-              homeName: '开拓者',
-              score: '124-110',
-              status: '已结束',
-              awayId: 'cba2020008',
-              homeId: 'cba2020015',
-            },
-            {
-              matchId: 'dsdsdsd323',
-              date:
-                new Date().getMonth() +
-                '月 ' +
-                new Date().getDay() +
-                ' 日 ' +
-                new Date().getHours() +
-                ':00',
-              awayName: '爵士',
-              homeName: '开拓者',
-              score: '111-110',
-              status: '已结束',
-              awayId: 'cba2020019',
-              homeId: 'cba2020015',
-            },
-            {
-              matchId: 'dsdsdsd323',
-              date:
-                new Date().getMonth() +
-                '月 ' +
-                new Date().getDay() +
-                ' 日 ' +
-                new Date().getHours() +
-                ':00',
-              awayName: '掘金',
-              homeName: '开拓者',
-              score: '101-110',
-              status: '已结束',
-              awayId: 'cba2020011',
-              homeId: 'cba2020015',
-            },
-          ],
-        },
-      ],
+      macthDate: '',
     }
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
   },
-  computed: {
-    noMore() {
-      return this.count >= 20
-    },
-    disabled() {
-      return this.loading || this.noMore
-    },
-  },
-  methods: {
-    load() {
-      this.loading = true
-      setTimeout(() => {
-        this.count = 10
-        this.loading = false
-      }, 2000)
-    },
-    backToday() {
-      this.date = new Date().getFullYear() + '-' + new Date().getMonth()
+  watch: {
+    data: {
+      handler(newValue, oldValue) {
+        this.macthDate = this.data
+      },
+      immediate: true,
+      deep: true,
     },
   },
+  computed: {},
+  methods: {},
 }
 </script>
 <style lang="scss">
@@ -235,10 +121,6 @@ export default {
     float: center;
   }
 }
-.picker {
-  width: 20px;
-  float: right;
-}
 .button {
   margin-right: 10px;
   float: right;
@@ -261,5 +143,10 @@ export default {
   border-radius: 3px;
   margin-bottom: 20px;
   float: left;
+}
+.match-span {
+  font-size: 18px;
+  font-weight: bolder;
+  vertical-align: middle;
 }
 </style>

@@ -40,9 +40,6 @@
             </el-dropdown-menu>
           </el-dropdown>
         </el-menu-item>
-        <el-menu-item class="menu_item" index="/home/data">
-          <i class="el-icon-data-analysis" style="font-size: 23px; color: #E6A23C" />数据中心
-        </el-menu-item>
       </el-menu>
     </el-header>
     <el-main class="test">
@@ -57,64 +54,6 @@ export default {
     return {
       teamList: '',
       listLoading: true,
-      test: [
-        {
-          name: '开拓者',
-          teamId: 'cba2020001'
-        },
-        {
-          name: '掘金',
-          teamId: 'cba2020002'
-        },
-        {
-          name: '奇才',
-          teamId: 'cba2020003'
-        },
-        {
-          name: '灰熊',
-          teamId: 'cba2020004'
-        },
-        {
-          name: '小牛',
-          teamId: 'cba2020005'
-        },
-        {
-          name: '太阳',
-          teamId: 'cba2020006'
-        },
-        {
-          name: '湖人',
-          teamId: 'cba2020007'
-        },
-        {
-          name: '凯尔特人',
-          teamId: 'cba2020008'
-        },
-        {
-          name: '篮网',
-          teamId: 'cba2020009'
-        },
-        {
-          name: '猛龙',
-          teamId: 'cba2020010'
-        },
-        {
-          name: '马刺',
-          teamId: 'cba2020011'
-        },
-        {
-          name: '勇士',
-          teamId: 'cba2020012'
-        },
-        {
-          name: '森林狼',
-          teamId: 'cba2020013'
-        },
-        {
-          name: '雷霆',
-          teamId: 'cba2020014'
-        }
-      ]
     }
   },
   created() {
@@ -123,19 +62,17 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      console.log('------------------------------------')
-      getTeamList().then((response) => {
-        console.log('------------------------------------' + response.data)
-        console.log('\n------------------------------------')
-        this.teamList = response.data.data
+      getTeamList().then((res) => {
+        this.teamList = res.data
+        //console.log(res.data)
         this.listLoading = false
       })
     },
+    handleCommand(){},
     handleSelect(key, keyPath) {
       console.log(key, keyPath)
-      this.fetchData()
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss">
