@@ -41,8 +41,8 @@
             </el-form-item>
           </el-form>
         </el-card>
-        <div v-show="vDisabled" v-loading="upLoading">
-          <el-card class="compare-card">
+        <div v-show="vDisabled">
+          <el-card class="compare-card" v-loading="upLoading">
             <div style="width:100%;">
               <div style="float:left;margin-left:20px;">
                 <div style="float:left;margin-left:20px;">
@@ -98,7 +98,7 @@
             </div>
             <!--近期战况-->
           </el-card>
-          <el-card class="compare-card" style="height:290px;">
+          <el-card v-loading="upLoading" class="compare-card" style="height:290px;">
             <baseline
               style="float:left;"
               title_="近七场赛况："
@@ -112,7 +112,7 @@
               :baseLineData="data.baseLineData.away"
             />
           </el-card>
-          <el-card class="compare-card" style="height:290px;">
+          <el-card v-loading="upLoading" class="compare-card" style="height:290px;">
             <baseline
               style="float:left;"
               title_="赛季交手："
@@ -130,7 +130,7 @@
               :baseLineData="lineData.allMatch"
             />
           </el-card>
-          <el-card class="compare-card" style="margin-bottom:100px;">
+          <el-card v-loading="upLoading" class="compare-card" style="margin-bottom:100px;">
             <progressBar :data="data.barData" />
             <div style="margin-bottom:100px;margin-top:20px;">
               <el-tag
@@ -227,7 +227,6 @@ export default {
     getTeamList().then((res) => {
       this.teamList = res.data
     })
-    //  this.vDisabled =  false
   },
   methods: {
     handleClick(tab, event) {},
@@ -248,13 +247,14 @@ export default {
             duration: 1700,
           })
           return }
-        this.vDisabled = false
+        //this.vDisabled = false
         this.upLoading = true
         this.queryForm = Object.assign({}, this.slectTeam)
         var parse = Object.assign({}, this.slectTeam)
         parse.season = this.season.season
         compareTeam(parse).then((res) => {
           this.data = res.data
+          this.vDisabled = true
           this.$notify({
             title: '提示',
             message: '数据返回成功',
@@ -262,7 +262,6 @@ export default {
             duration: 1700,
           })
           this.upLoading = false
-          this.vDisabled = true
         })
         compareMatch(parse).then((res) => {
           this.lineData = res.data

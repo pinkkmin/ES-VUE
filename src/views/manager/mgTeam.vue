@@ -1,3 +1,7 @@
+<!--
+ * @Descripttion: 
+ * @Date: 2020-08-09 12:51:27
+-->
 <template>
   <el-card v-loading="loading" style="margin: 20px 10px 20px 10px">
     <el-button icon="el-icon-attract" style="margin-bottom:20px;" type="success" @click="dialogCreate=true">新 建 球 队</el-button>
@@ -18,43 +22,41 @@
           />
         </template>
       </el-table-column>
-      <el-table-column prop="teamName" label="队名" />
-      <el-table-column prop="teamCity" label="所在城市" />
-      <el-table-column prop="teamCoach" label="主教练" />
-      <el-table-column prop="teamHome" width="250px" label="主场球馆" />
-      <el-table-column prop="teamClub" width="250px" label="俱乐部" />
+      <el-table-column prop="name" label="队名" />
+      <el-table-column prop="city" label="所在城市" />
+      <el-table-column prop="coach" label="主教练" />
+      <el-table-column prop="home" width="250px" label="主场球馆" />
+      <el-table-column prop="club" width="250px" label="俱乐部" />
       <el-table-column label="操 作">
         <template slot-scope="scope">
           <el-button
             type="danger"
             size="medium"
-            @click="dialogVisible=true, handleEdit(scope.$index)"
+            @click="handleEdit(scope.$index)"
           >编 辑</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="球队管理-编辑" :visible.sync="dialogVisible" :before-close="handleClose">
-      <editTeam ref="editForm" title="修 改" :data="editTeamData" />
-    </el-dialog>
+      <editTeam title="修 改" :dialogVisible="dialog" @my-event="updateEditForm" :data="editTeamData" />
   </el-card>
 </template>
 
 <script>
 import editTeam from '@/components/others/editTeam.vue'
-import { validManagerTeamList } from '@/utils/validate'
 import {getTeamList} from '@/api/global'
+
 export default {
   components: {
     editTeam,
   },
   data() {
-    const table = validManagerTeamList()
     return {
       //base
       loading: true,
       teamTable: '',
       dialogCreate: false,
-      dialogVisible: false,
+      dialog:false,
+      editIndex:0,
       createData: {
         teamId: '',
         name: '',
@@ -86,16 +88,12 @@ export default {
       })
     },
     handleEdit(index) {
-      this.editTeamData = this.teamTable[index]
-      this.$refs.editForm.setForm(this.teamTable[index])
-    },
-    handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          this.$refs.editForm.resetForm()
-          done()
-        })
-        .catch((_) => {})
+      this.editIndex = index
+      this.editTeamData = Object.assign({},this.teamTable[index])
+      this.dialog=true
+    }, 
+    updateEditForm(data){
+      this.$set(this.teamTable,this.editIndex,data)
     },
     handleCloseCreate(done) {
       this.$confirm('确认关闭？')

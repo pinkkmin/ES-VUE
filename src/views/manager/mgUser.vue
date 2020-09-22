@@ -7,8 +7,8 @@
     <el-form style="margin-top:15px;" ref="queryForm" :model="queryForm" :inline="true">
       <el-form-item label="用户类型">
         <el-select v-model="queryForm.userType" clearable filterable placeholder="选择类型">
-          <el-option label="管理员" value="admin" />
-          <el-option label="普通用户" value="user" />
+          <el-option label="管理员" value="1" />
+          <el-option label="普通用户" value="0" />
         </el-select>
       </el-form-item>
       <el-form-item label="用户名：" style="margin-left:5%;">
@@ -31,7 +31,7 @@
       <el-table-column prop="userEmail" label="邮箱" />
       <el-table-column label="类型">
         <template slot-scope="scope">
-          <span v-if="userData.data[scope.$index].type === 1">管理员</span>
+          <span v-if="userData.data[scope.$index].role === 1">管理员</span>
           <span v-else>普通用户</span>
         </template>
       </el-table-column>
@@ -58,23 +58,19 @@
       :current-page.sync="queryForm.page"
       layout="total,prev, pager, next,jumper"
       :total="userData.count"
-      :page-size="1"
+      :page-size="10"
     />
     <el-dialog title="用户管理" :visible.sync="dialogUser" :before-close="handleClose">
       <el-form :model="editForm" :rules="rules" ref="editUserForm" style="margin-top:20px;">
         <el-form-item label=" 邮  箱 ：" prop="email">
-          <el-input
-            style="font-size:17px;width:80%;"
-            disabled
-            v-model="editForm.email"
-          ></el-input>
+          <el-input style="font-size:17px;width:80%;" disabled v-model="editForm.email"></el-input>
         </el-form-item>
         <el-form-item label="用户类型" style="margin-top:20px;" prop="type">
           <el-select v-model="editForm.type" clearable placeholder="管理权限">
             <el-option label="管理员" :value="1" />
             <el-option label="普通用户" :value="0" />
           </el-select>
-          <el-form-item v-if="editForm.type === 1" label="球 队" style="margin-top:25px;" prop="teamId">
+          <el-form-item label="球 队" style="margin-top:25px;" prop="teamId">
             <el-select v-model="editForm.teamId" clearable filterable placeholder="管理权限">
               <el-option
                 v-for="(item,index) in teamList"
@@ -99,8 +95,8 @@
 </template>
 
 <script>
-import { getTeamList } from '@/api/global'
-import { queryUsers } from '@/api/manager'
+import { getTeamList } from '@/api/team'
+import { queryUsers, editUser } from '@/api/manager'
 export default {
   data() {
     return {
@@ -115,15 +111,16 @@ export default {
       editIndex: 0,
       editForm: {
         userId: '',
-        email:'',
+        email: '',
         type: 0,
-        teamId:'',
+        teamId: '',
       },
-      queryForm: { // 查询提交表单
+      queryForm: {
+        // 查询提交表单
         userName: '',
         userType: '',
         email: '',
-        page: 0,
+        page: 1,
         pageSize: 10,
       },
       rules: {
@@ -134,26 +131,18 @@ export default {
   },
   created() {
     getTeamList().then((res) => {
-      this.teamList = res.data.data
+      this.teamList = res.data
     })
     this.loading = true
-    queryUsers(this.queryForm)
-        .then((qs) => {
-          this.userData = qs.data
-          this.loading = false
-        })
-        .catch(() => {
-          this.loading = false
-        })
+    this.query()
   },
   methods: {
-      handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          done()
-        })
+    handleClose(done) {
+      this.$confirm('确认关闭？').then((_) => {
+        done()
+      })
     },
-     handleCurrentChange() {
+    handleCurrentChange() {
       this.loading = true
       this.query()
     },
@@ -169,9 +158,12 @@ export default {
     },
     query() {
       this.loading = true
-      queryUsers(this.queryForm)
+      var parse = Object.assign({}, this.queryForm)
+      parse.page -= 1
+      queryUsers(parse)
         .then((qs) => {
           this.userData = qs.data
+          console.log(this.userData)
           this.loading = false
           this.$notify({
             title: '查询提示',
@@ -185,7 +177,6 @@ export default {
         })
     },
     submitForm(formName) {
-     //  console.log(this.editForm)
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$confirm('确认提交, 是否继续?', '提示', {
@@ -193,14 +184,26 @@ export default {
             cancelButtonText: '取消',
             type: 'warning',
           })
-            .then((_) => {              
-              this.$notify({
-                title: '提示',
-                message: '修改成功',
-                type: 'success',
-                duration: 1000,
+            .then((_) => {
+              editUser(this.editForm).then((res) => {
+                if (res.data === null) {
+                  this.$notify({
+                    title: '提示',
+                    message: '未发生变化',
+                    type: 'success',
+                    duration: 1000,
+                  })
+                } else {
+                  this.$set(this.userData.data, this.editIndex, res.data)
+                  this.$notify({
+                    title: '提示',
+                    message: '修改成功',
+                    type: 'success',
+                    duration: 1000,
+                  })
+                }
+                this.dialogUser = false
               })
-              this.dialogUser = false
             })
             .catch((_) => {})
         } else {
@@ -210,10 +213,10 @@ export default {
       })
     },
     handleEditUser(data) {
-      this.editForm.userId  = data.userId
-      this.editForm.email  = data.userEmail
-      this.editForm.type  =  data.role
-      this.editForm.teamId  = data.team.teamId
+      this.editForm.userId = data.userId
+      this.editForm.email = data.userEmail
+      this.editForm.type = data.role
+      this.editForm.teamId = data.team.teamId
     },
   },
 }

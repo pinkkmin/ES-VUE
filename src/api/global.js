@@ -28,6 +28,12 @@ export function getTeamList(){
     method: 'get'
   })
 }
+export function getPlayerListByTeam() {
+  return request({
+    url: 'api/global/playerListByTeam',
+    method: 'get'
+  })
+}
 export function getMatchsByDay(data_){
   return request({
     url: '/api/global/matchByDay',
@@ -70,6 +76,22 @@ export function resetPwd(data_) {
 export function register(data_) {
   return request({
     url: '/api/global/register',
+    method: 'post',
+    data:data_
+
+  })
+}
+export function getPlayerService(data_) {
+  return request({
+    url: '/api/global/playerService',
+    method: 'post',
+    data:data_
+
+  })
+}
+export function getAllPlayer(data_) {
+  return request({
+    url: 'api/global/queryPlayerList',
     method: 'post',
     data:data_
 

@@ -25,7 +25,7 @@
         <span class="match-span" style="font-size:20px;">{{ item.day }}日</span>
       </div>
       <el-table :data="item.data" stripe :show-header="false" style="width: 100%">
-        <el-table-column prop="date" label="日期" />
+        <el-table-column prop="date" label="日期" width="180px" />
         <el-table-column label="状态">
           <template scope="scope">
             <span v-if="item.data[scope.$index].status === '1'">已结束</span>

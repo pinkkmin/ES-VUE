@@ -58,7 +58,7 @@
         <i class="el-icon-user" style="color:#67C23A;font-size:28px;">CMF & LSS</i>
       </div>
     </footer>
-    <el-dialog :title="title" :visible.sync="dialogVisible" width="35%">
+    
       <el-button
         v-show="!show"
         type="success"
@@ -97,7 +97,7 @@
               </el-input>
             </el-form-item>
             <el-form-item prop="passwd" label="密码">
-              <el-input type="password" placeholder="填写密码" v-model="regForm.passwd" />
+              <el-input type="password" placeholder="填写密码" v-model="regForm.passwd" :show-password="true" />
             </el-form-item>
             <el-form-item prop="checkPass" label="确认密码">
               <el-input
@@ -105,6 +105,7 @@
                 placeholder="再次确认密码"
                 v-model="regForm.checkPass"
                 autocomplete="on"
+                :show-password="true"
               />
             </el-form-item>
             <el-form-item prop="teamId" label="主队">
@@ -144,7 +145,7 @@
             </el-input>
           </el-form-item>
           <el-form-item prop="passwd" label="新密码">
-            <el-input type="password" placeholder="填写密码" v-model="passForm.passwd" />
+            <el-input type="password" placeholder="填写密码" :show-password="true" v-model="passForm.passwd" />
           </el-form-item>
           <el-form-item prop="checkPass" label="确认密码">
             <el-input
@@ -152,6 +153,7 @@
               placeholder="再次确认密码"
               v-model="passForm.checkPass"
               autocomplete="on"
+              :show-password="true"
             />
           </el-form-item>
           <el-form-item>

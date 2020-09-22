@@ -45,16 +45,16 @@
           >发布者：{{ item.auth }}</el-tag>
           <el-tag
             effect="dark"
-            v-if="item.home.teamId!=''"
+            v-if="item.home.homeId!=''"
             size="medium"
             style="margin-left:10px"
-          >球队：{{ item.home.teamName }}</el-tag>
+          >球队：{{ item.home.homeName }}</el-tag>
           <el-tag
             effect="dark"
-            v-if="item.away.teamId!=''"
+            v-if="item.away.awayId!=''"
             size="medium"
             style="margin-left:10px"
-          >球队：{{ item.away.teamName }}</el-tag>
+          >球队：{{ item.away.awayName }}</el-tag>
           <el-tag
             v-if="item.player.playerName!=''"
             size="medium"
@@ -76,15 +76,7 @@
           >重新编辑</el-button>
         </el-collapse-item>
       </el-collapse>
-      <el-dialog
-        title="公告编辑"
-        :visible.sync="dialogVisible"
-        width="70%"
-        style="margin-top:10px;"
-        :before-close="handleClose"
-      >
-        <edit-notice-form ref="editForm" :data="editNoticeItem" />
-      </el-dialog>
+        <edit-notice-form title="公告编辑"  @my-event="updateEditForm" :dialogVisible="dialogVisible" ref="editForm" :data="editNoticeItem" />
       <el-pagination
         style="margin:50px 0px 20px 0px; margin-left:35%;"
         background
@@ -95,7 +87,7 @@
         :current-page.sync="queryForm.page"
         layout="total,prev, pager, next,jumper"
         :total="notice.count"
-        :page-size="1"
+        :page-size="10"
       />
     </el-card>
   </div>
@@ -104,7 +96,7 @@
 <script>
 import editNoticeForm from '@/components/others/editNoticeForm.vue'
 import { queryNotices } from '@/api/manager'
-import { getTeamList } from '@/api/global'
+import { getTeamList } from '@/api/team'
 export default {
   components: {
     editNoticeForm,
@@ -114,6 +106,7 @@ export default {
       //base
       loading: true,
       dialogVisible: false,
+      editIndex:0,
       //data
       notice: {
         count: 100,
@@ -131,12 +124,12 @@ export default {
           playerId: '',
         },
         home: {
-          teamName: '',
-          teamId: '',
+          homeName: '',
+          homeId: '',
         },
         away: {
-          teamName: '',
-          teamId: '',
+          awayName: '',
+          awayId: '',
         },
       },
       // query
@@ -151,9 +144,10 @@ export default {
   },
   created() {
     getTeamList().then((res) => {
-      this.teamList = res.data.data
+      this.teamList = res.data
     })
-    queryNotices(this.queryForm)
+    var parse = Object.assign({},this.queryForm)
+    queryNotices(parse)
       .then((qs) => {
         this.notice = qs.data
         this.loading = false
@@ -179,8 +173,9 @@ export default {
     },
     query() {
       this.loading = true
-      this.queryForm.start = (this.queryForm.page - 1) * this.queryForm.pageSize
-      queryNotices(this.queryForm)
+      var parse = Object.assign({},this.queryForm)
+      parse.page -= 1 
+      queryNotices(parse)
         .then((qs) => {
           this.notice = qs.data
           this.loading = false
@@ -214,19 +209,13 @@ export default {
           })
         })
     },
-    handleClose(done,sign) {
-      console.log(sign)
-      if(!sign) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          done()
-        })
-        .catch((_) => {})
-      }else done()
+    updateEditForm(data){
+      this.$set(this.notice.data,this.editIndex,data)
+      this.dialogVisible = false
     },
     handleChange(index) {
+      this.editIndex = index
       this.editNoticeItem = Object.assign({}, this.notice.data[index])
-      // this.$refs.editForm.setForm(this.editNoticeItem)
     },
   },
 }

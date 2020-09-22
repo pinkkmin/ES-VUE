@@ -63,7 +63,15 @@ export function lastSeasonAvg(data_) {
 
 export function compareTeam(data_) {
   return request({
+   // url: 'http://47.97.192.85:8080/api/team/compare/teams',
     url: 'api/team/compare/teams',
+    method: 'post',
+    data:data_
+  })
+}
+export function comparePlayer(data_) {
+  return request({
+    url: 'api/team/compare/players',
     method: 'post',
     data:data_
   })
@@ -76,3 +84,11 @@ export function compareMatch(data_) {
   })
 }
 
+/**Manager team***/
+export function getPlayersByTeamId(data_) {
+  return request({
+    url: 'api/global/playerList',
+    method: 'post',
+    data:data_
+  })
+}

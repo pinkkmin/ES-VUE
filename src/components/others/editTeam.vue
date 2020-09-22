@@ -1,39 +1,43 @@
 <template>
   <div :id="elId">
-    <el-form :model="editForm" :rules="rules" ref="editForm" label-width="100px">
-      <el-form-item label="队名" prop="teamName">
-        <el-input style="font-size:17px;" placeholder="输入队名" v-model="editForm.teamName"></el-input>
-      </el-form-item>
-      <el-form-item label="主教练" prop="coach">
-        <el-input style="font-size:17px;" placeholder="输入主教练" v-model="editForm.coach"></el-input>
-      </el-form-item>
-      <el-form-item label="城市" prop="city">
-        <el-input style="font-size:17px;" placeholder="输入城市" v-model="editForm.city"></el-input>
-      </el-form-item>
-      <el-form-item label="主场球馆" prop="home">
-        <el-input style="font-size:17px;" placeholder="输入主场球馆" v-model="editForm.home"></el-input>
-      </el-form-item>
-      <el-form-item label="俱乐部名称" prop="club">
-        <el-input style="font-size:17px;" placeholder="输入俱乐部名称" v-model="editForm.club"></el-input>
-      </el-form-item>
-    </el-form>
-    <div style="margin-bottom:70px;">
-      <el-button
-        round
-        style="float:right;margin-right:10px;"
-        type="primary"
-        @click="submitForm('editForm')"
-      >{{ title }}</el-button>
-    </div>
+    <el-dialog :title="title" :visible.sync="closed" :before-close="handleClose">
+      <el-form :model="editForm" :rules="rules" ref="editForm" label-width="100px">
+        <el-form-item label="队名" prop="name">
+          <el-input style="font-size:17px;" placeholder="输入队名" v-model="editForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="主教练" prop="coach">
+          <el-input style="font-size:17px;" placeholder="输入主教练" v-model="editForm.coach"></el-input>
+        </el-form-item>
+        <el-form-item label="城市" prop="city">
+          <el-input style="font-size:17px;" placeholder="输入城市" v-model="editForm.city"></el-input>
+        </el-form-item>
+        <el-form-item label="主场球馆" prop="home">
+          <el-input style="font-size:17px;" placeholder="输入主场球馆" v-model="editForm.home"></el-input>
+        </el-form-item>
+        <el-form-item label="俱乐部名称" prop="club">
+          <el-input style="font-size:17px;" placeholder="输入俱乐部名称" v-model="editForm.club"></el-input>
+        </el-form-item>
+      </el-form>
+      <div style="margin-bottom:70px;">
+        <el-button
+          round
+          style="float:right;margin-right:10px;"
+          type="primary"
+          @click="submitForm('editForm')"
+        >{{ title }}</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { editTeamInfo } from '@/api/manager'
 export default {
   props: {
     title: '',
+    dialogVisible: '',
     data: {
       teamId: '',
-      teamName: '',
+      name: '',
       coach: '',
       city: '',
       home: '',
@@ -43,30 +47,27 @@ export default {
   data() {
     return {
       elId: '',
+      closed: false,
       editForm: {
         teamId: '',
-        teamName: '',
+        name: '',
         coach: '',
         city: '',
         home: '',
         club: '',
       },
       rules: {
-        teamName: [
+        name: [
           { required: true, message: '请输入正确内容' },
           {
-            min: 3,
+            min: 2,
             max: 45,
-            message: '长度在 3 到45个字符',
+            message: '长度在 2 到45个字符',
             trigger: 'blur',
           },
         ],
-        coach: [
-          { required: true, message: '请输入正确内容' },
-        ],
-        city: [
-          { required: true, message: '请输入正确内容' },
-        ],
+        coach: [{ required: true, message: '请输入正确内容' }],
+        city: [{ required: true, message: '请输入正确内容' }],
         home: [
           { required: true, message: '请输入正确内容' },
           {
@@ -76,7 +77,7 @@ export default {
             trigger: 'blur',
           },
         ],
-         club: [
+        club: [
           { required: true, message: '请输入正确内容' },
           {
             min: 3,
@@ -90,24 +91,49 @@ export default {
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
-  this.setForm(this.data)
+  },
+  watch: {
+    data: {
+      handler(newValue, oldValue) {
+        this.editForm = this.data
+        this.closed = this.dialogVisible
+      },
+    },
+    immediate: true,
+    deep: true,
   },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
-        } else {
-          console.log('error submit!!')
-          return false
+          this.$confirm('修改确认, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }).then((_) => {
+            editTeamInfo(this.editForm).then((res) => {
+              this.closed = false
+              this.$emit('my-event', this.editForm)
+              this.$notify({
+                title: '编辑提示',
+                message: '编辑球队信息成功',
+                type: 'success',
+                duration: 1700,
+              })
+            })
+          })
         }
       })
     },
-    setForm(data) {
-       this.editForm = Object.assign({}, data)  
-    },
     resetForm() {
       this.editForm = {}
+    },
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then((_) => {
+          done()
+        })
+        .catch((_) => {})
     },
   },
 }

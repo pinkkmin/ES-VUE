@@ -43,6 +43,7 @@
       </el-card>
     </div>
      <el-card style="float:left;margin-left:20px;margin-right:10px;margin-top:10px;width:97%;">
+       <sevChart :data="service"> </sevChart>
      </el-card>
     <el-card v-loading.lock="loading" style="float:left;margin-left:20px;margin-right:10px;margin-top:10px;width:97%;">
       <div>
@@ -109,9 +110,33 @@ import bareChart from '@/components/echart/barEchart.vue'
 import sevChart from '@/components/echart/serviceChart.vue'
 //API
 import { getPlayerInfo, getPlayerSeasonData } from '@/api/home'
-import { getCurSeason } from '@/api/global'
+import { getCurSeason,getPlayerService } from '@/api/global'
 export default {
+   components: {
+    bareChart,
+    sevChart
+  },
   data() {
+    const date_=[
+        '2014-07-18',
+        '2015-1-9',
+        '2016-07-18',
+        '2017-7-9',
+        '2018-07-18',
+        '2019-1-9',
+        '2020-1-9',
+        '2020-9-9',
+      ]
+    const status_ = [
+              { value: '解雇', name: '开拓者' },
+              { value: '交易', name: '广东' },
+              { value: '签约', name: 'rose4' },
+              { value: '交易', name: '掘金' },
+              { value: '签约', name: 'rose6' },
+              { value: '退役', name: '你好' },
+              { value: '首签', name: 'rose7' },
+              { value: '退役', name: 'rose8' },
+            ]
     const home = [
       {
         score: 30,
@@ -162,7 +187,7 @@ export default {
       loading:true,
       baseUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
       name: '球员名', //playerName
-      playerId: '110177',
+      playerId: '112177',
       team: '球队名', //teamName
       height: 198,
       weight: 100.5,
@@ -181,6 +206,10 @@ export default {
 
       seasonList: season, //  api/global/seasonList
       selectSeason: season[0].season,
+      service:{
+        date: [],
+        status:[]
+      }
     }
   },
   created() {
@@ -212,6 +241,11 @@ export default {
           this.drawChart()
           this.loading = false
         })
+      })
+       var par = {}
+       par.playerId = this.playerId
+      getPlayerService(par).then((res)=>{
+        this.service = res.data
       })
     },
     drawChart() {
@@ -260,9 +294,6 @@ export default {
   },
   mounted() {
     this.drawChart()
-  },
-  components: {
-    bareChart,
   },
 }
 </script>

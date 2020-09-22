@@ -36,13 +36,12 @@
         <el-button style="margin-left:15px;" type="success" @click="onsubmit()">确 认</el-button>
       </el-form-item>
     </el-form>
-    <div v-if="vDisabled">
+    <div  v-show="vDisabled">
       <div style="width:100%;">
         <div style="float:left;">
           <el-image
             style="width: 170px; height: 170px"
-            :src="'team/' + queryForm.homePlayerId +'.png'"
-            fit
+            :src="homeLogo +'.png'"
           ></el-image>
         </div>
         <div style="float:left;margin-top:17px;margin-left:10px;">
@@ -51,24 +50,26 @@
             <li>
               <span style="font-size:19px;">号码：</span>
               <el-tag style="font-size:16px;margin-bottom:5px;"># {{ data.home.number }}</el-tag>
-              <span style="margin-left:10px;font-size:19px;">球队：</span>
-              <el-tag style="font-size:16px;margin-bottom:5px;">{{ data.home.teamName}}</el-tag>
+            </li>
+            <li>
+              <span style="font-size:19px;">球队：</span>
+              <el-tag effect="dark" style="font-size:16px;margin-bottom:5px;">{{ data.home.teamName}}</el-tag>
             </li>
             <li style="margin-bottom:5px;">
               <span style="font-size:18px;">生日：</span>
-              <span style="font-size:16px;">{{ data.home.brith}}</span>
+              <span style="font-size:16px;">{{ data.home.birth}}</span>
             </li>
             <li style="margin-bottom:5px;">
               <span style="font-size:18px;">身高：</span>
-              <span style="font-size:16px;">{{ data.home.height}}</span>
-              <span style="margin-left:10px;font-size:18px;">体重：</span>
-              <span style="font-size:16px;">{{ data.home.weight}}</span>
+              <span style="font-size:16px;">{{ data.home.height}} cm</span>
             </li>
             <li style="margin-bottom:5px;">
-              <span style="font-size:18px;">位置:</span>
+              <span style="font-size:18px;">体重：</span>
+              <span style="font-size:16px;">{{ data.home.weight}} kg</span>
+            </li>
+            <li style="margin-bottom:5px;">
+              <span style="font-size:18px;">位置：</span>
               <span style="font-size:18px;">{{ data.home.position}}</span>
-              <span style="font-size:18px;margin-left:10px;">臂展：</span>
-              <span style="font-size:16px;">{{ data.home.wingspan}}</span>
             </li>
           </ul>
         </div>
@@ -83,48 +84,49 @@
             <li>
               <span style="font-size:19px;">号码：</span>
               <el-tag style="font-size:16px;margin-bottom:5px;"># {{ data.away.number }}</el-tag>
-              <span style="margin-left:10px;font-size:19px;">球队：</span>
-              <el-tag style="font-size:16px;margin-bottom:5px;">{{ data.away.teamName}}</el-tag>
+            </li>
+            <li>
+              <span style="font-size:19px;">球队：</span>
+              <el-tag effect="dark" color="#ec6a86"  style="font-size:16px;margin-bottom:5px;">{{ data.away.teamName}}</el-tag>
             </li>
             <li style="margin-bottom:5px;">
               <span style="font-size:18px;">生日：</span>
-              <span style="font-size:16px;">{{ data.away.brith}}</span>
+              <span style="font-size:16px;">{{ data.away.birth}}</span>
             </li>
             <li style="margin-bottom:5px;">
               <span style="font-size:18px;">身高：</span>
-              <span style="font-size:16px;">{{ data.away.height}}</span>
-              <span style="margin-left:10px;font-size:18px;">体重：</span>
-              <span style="font-size:16px;">{{ data.away.weight}}</span>
+              <span style="font-size:16px;">{{ data.away.height}} cm</span>
             </li>
             <li style="margin-bottom:5px;">
-              <span style="font-size:18px;">位置:</span>
+              <span style="font-size:18px;">体重：</span>
+              <span style="font-size:16px;">{{ data.away.weight}} kg</span>
+            </li>
+            <li style="margin-bottom:5px;">
+              <span style="font-size:18px;">位置：</span>
               <span style="font-size:18px;">{{ data.away.position}}</span>
-              <span style="font-size:18px;margin-left:10px;">臂展：</span>
-              <span style="font-size:16px;">{{ data.away.wingspan}}</span>
             </li>
           </ul>
         </div>
-        <div style="float:right;">
+        <div style="float:left;">
           <el-image
-            style="width: 160px; height: 170px"
-            :src="'team/' + queryForm.awayPlayerId +'.png'"
-            fit
+            style="width: 170px; height: 170px"
+            :src="awayLogo +'.png'"
           ></el-image>
         </div>
       </div>
       <div>
-      <progressBar :data="data.barData" />
-      <div style="margin-bottom:100px;margin-top:20px;">
-        <el-tag
-          type="success"
-          effect="dark"
-          style="font-size:30px;margin-left:20%;"
-        >{{ data.home.best }}项强于对手</el-tag>
-        <el-tag
-          effect="dark"
-          style="font-size:30px;float:right;margin-right:28%;"
-        >{{ data.away.best }}项强于对手</el-tag>
-      </div>
+        <progressBar :data="data.barData" />
+        <div style="margin-bottom:100px;margin-top:20px;">
+          <el-tag
+            type="success"
+            effect="dark"
+            style="font-size:30px;margin-left:20%;"
+          >{{ data.home.best }}项强于对手</el-tag>
+          <el-tag
+            effect="dark"
+            style="font-size:30px;float:right;margin-right:28%;"
+          >{{ data.away.best }}项强于对手</el-tag>
+        </div>
       </div>
     </div>
   </el-card>
@@ -133,86 +135,23 @@
 <script>
 import compareRadar from '@/components/echart/compareRadar.vue'
 import progressBar from '@/components/others/progressBar.vue'
-import { validManagerTeamList, validComparePlayerList } from '@/utils/validate'
+import { getCurSeason, getPlayerListByTeam } from '@/api/global'
+import { comparePlayer } from '@/api/team'
 export default {
   components: {
     compareRadar,
     progressBar,
   },
-  props: {
-    Data: '',
-  },
   data() {
-    const teamList_ = validManagerTeamList()
-    const playerList_ = validComparePlayerList()
-    const radar = {
-      data: [
-        {
-          value: [28.9, 8.2, 8.5, 3.5, 1.8],
-          name: '开拓者',
-        },
-        {
-          value: [21.9, 1.2, 5.5, 5.5, 0.8],
-          name: '掘金',
-        },
-      ],
-      max: {
-        maxScore: 35.4,
-        maxAssist: 15,
-        maxBound: 15,
-        maxBlock: 10,
-        maxSteal: 10,
-      },
-    }
-    // 对比图
-    const count = [
-      {
-        homeValue: 123,
-        index: '得分',
-        awayValue: 102,
-      },
-      {
-        homeValue: 24,
-        index: '助攻',
-        awayValue: 28,
-      },
-      {
-        homeValue: 17,
-        index: '篮板',
-        awayValue: 14,
-      },
-      {
-        homeValue: 7,
-        index: '抢断',
-        awayValue: 14,
-      },
-      {
-        homeValue: 8,
-        index: '盖帽',
-        awayValue: 12,
-      },
-      {
-        homeValue: 24,
-        index: '罚球',
-        awayValue: 30,
-      },
-      {
-        homeValue: 15,
-        index: '犯规',
-        awayValue: 14,
-      },
-      {
-        homeValue: 15,
-        index: '失误',
-        awayValue: 1,
-      },
-    ]
     return {
       // base
       elId: '',
+      baseUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
+      homeLogo: this.baseUrl+'0',
+      awayLogo: this.baseUrl+'0',
       vDisabled: false,
-      teamList: teamList_,
-      playerList: playerList_,
+      playerList: [],
+      season: '',
       slectTeam: {
         homePlayerId: '',
         awayPlayerId: '',
@@ -225,44 +164,74 @@ export default {
       data: {
         home: {
           playerId: '',
-          playerName: '陈明富',
-          teamId: 'cba2020008',
-          teamName: '开拓者',
+          playerName: '',
+          teamId: '',
+          teamName: '',
           number: 0,
           height: 201.5,
           weight: 105.9,
-          wingspan: 208.9,
-          brith: '2020-08-09',
-          position: '得分后卫',
-          best: 9,
+          brith: '',
+          position: '',
+          best: 0,
         },
         away: {
           playerId: '',
-          playerName: '刘树生',
-          teamId: 'cba2020008',
-          teamName: '开拓者',
+          playerName: '',
+          teamId: '',
+          teamName: '',
           number: 15,
           height: 201.5,
           weight: 105.9,
-          wingspan: 208.9,
-          brith: '2020-08-09',
-          position: '小前锋',
-          best: 5,
+          brith: '',
+          position: '',
+          best: 0,
         },
-        radarData: radar,
-        barData: count,
+        radarData: {},
+        barData: [],
       },
     }
   },
   created() {
     this.elId = Math.random().toString(36).slice(-8)
+    getPlayerListByTeam().then((res) => {
+      this.playerList = res.data
+    })
+    getCurSeason().then((res) => {
+      this.season = res.data.season
+    })
   },
   methods: {
     onsubmit() {
-      if (this.slectTeam.homePlayerId != '' && this.slectTeam.awayPlayerId != '') {
-        this.$message(this.slectTeam.awayPlayerId)
-        this.vDisabled = true
+      if (
+        this.slectTeam.homePlayerId != '' &&
+        this.slectTeam.awayPlayerId != ''
+      ) {
+        if(this.slectTeam.homePlayerId === this.queryForm.homePlayerId &&
+         this.slectTeam.awayPlayerId === this.queryForm.awayPlayerId) {
+           this.$notify({
+            title: '提示',
+            message: '选择未发生变化',
+            type: 'success',
+            duration: 1700,
+          })
+          return }
         this.queryForm = Object.assign({}, this.slectTeam)
+        var parse = this.queryForm
+        parse.season = this.season
+        comparePlayer(parse).then((res) => {
+          this.data = res.data
+          if(res.data.home.logo === 1) this.homeLogo = this.baseUrl + res.data.home.playerId
+          else this.homeLogo = this.baseUrl +'0'
+           if(res.data.away.logo === 1) this.awayLogo = this.baseUrl + res.data.away.playerId
+          else this.awayLogo = this.baseUrl +'0'
+          this.vDisabled = true
+          this.$notify({
+            title: '提示',
+            message: '数据加载完毕',
+            type: 'success',
+            duration: 1700,
+          })
+        })
       } else {
         this.$notify({
           title: '提示',

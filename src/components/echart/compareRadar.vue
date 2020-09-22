@@ -24,6 +24,7 @@ export default {
   data() {
     return {
       elId: '',
+      chart:'',
       radData:{}
     }
   },
@@ -32,9 +33,12 @@ export default {
       deep: true,
       immediate: true,
       handler: function (newValue, oldValue) {
-       this.radData = this.data
+       this.radData = this.data   
        if(this.elId != '') {
-        this.drawChart()
+        if (!this.chart) {
+            this.initChart()
+          }
+          this.setOption()
        } 
       },
     },
@@ -43,10 +47,7 @@ export default {
     this.elId = Math.random().toString(36).slice(-8)
   },
   methods: {
-    drawChart() {
-      // 基于准备好的dom，初始化echarts实例
-      let myChart = this.$echarts.init(document.getElementById(this.elId))
-      
+    setOption() {
       // 指定图表的配置项和数据
       let option = {
         title: {
@@ -83,11 +84,17 @@ export default {
           },
         ],
       }
-      myChart.setOption(option)
+     this.chart.setOption(option, true)
+    },
+     initChart() {
+      // 基于准备好的dom，初始化echarts实例
+      this.chart = this.$echarts.init(document.getElementById(this.elId))
+      // 指定图表的配置项和数据
     },
   },
   mounted(){
-    
+    this.initChart()
+     this.setOption()
   }
 }
 </script>

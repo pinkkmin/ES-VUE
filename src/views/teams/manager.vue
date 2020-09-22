@@ -1,15 +1,14 @@
 <template>
   <div>
-    <el-card class="analysis-card" style="height:200px;">
+    <el-card v-loading="loading" class="analysis-card" style="height:200px;">
       <div style="float:left;">
         <el-image
           style="width: 170px; height: 170px"
           :src="'team/' + team.teamId +'.png'"
-          :fit="fit"
         ></el-image>
       </div>
       <div style="float:left;margin-left:20px;">
-        <div style="color: #2ec7ee;font-size:30px;font-weight: bolder;">{{ team.teamName }}</div>
+        <div style="color: #2ec7ee;font-size:30px;font-weight: bolder;">{{ team.name }}</div>
         <ul style="list-style: none;margin-left:-13%;">
           <li>
             <span style="font-size:20px;">教练:</span>
@@ -39,22 +38,21 @@
         <editTeam ref="editForm" title="修 改" :data="team" />
       </el-dialog>
     </el-card>
-    <el-card style="vertical-align:middle;float: left;margin:10px 10px 10px 20px;width: 97%;">
+    <el-card v-loading="loading" style="vertical-align:middle;float: left;margin:10px 10px 10px 20px;width: 97%;">
       <el-table :data="playerTable" style="width: 100%">
         <el-table-column prop="date" width="80">
           <template slot-scope="scope">
             <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-              <el-avatar
-                style="background-color:#fff;"
-                :size="55"
-                :src="'team/' + playerTable[scope.$index].playerId +'.png'"
+              <el-image
+                style="width: 75px; height: 70px;background-color:#fff;"
+                :src="baseUrl + getLogoUrl(playerTable[scope.$index].logo,playerTable[scope.$index].playerId) +'.png'"
               />
             </el-link>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="number" label="号码" />
-        <el-table-column prop="brith" label="出生日期" />
+        <el-table-column prop="birth" label="出生日期" />
         <el-table-column prop="age" label="年龄" />
         <el-table-column prop="position" label="位置" />
         <el-table-column prop="wingspan" label="臂展(kg)" />
@@ -102,10 +100,10 @@
           <el-form-item label="交易至" prop="awayId">
             <el-select v-model="dealForm.awayId" clearable placeholder="请选择球队">
               <el-option
-                v-for=" item in teamList"
-                :key="item"
+                v-for="(item,index) in teamList"
+                :key="'team'+index"
                 :disabled="item.teamId === team.teamId"
-                :label="item.name"
+                :label="item.teamName"
                 :value="item.teamId"
               />
             </el-select>
@@ -130,23 +128,22 @@
 import editTeam from '@/components/others/editTeam.vue'
 import editPlayer from '@/components/others/editPlayer.vue'
 import { getCurSeason } from '@/api/global'
-import { getTeamInfo } from '@/api/team'
-import { validManagerPlayerList, validManagerTeamList } from '@/utils/validate'
+import { getTeamInfo,getTeamList,getPlayersByTeamId } from '@/api/team'
 export default {
   components: {
     editTeam,
     editPlayer,
   },
   data() {
-    const playerList = validManagerPlayerList()
-    const teamList_ = validManagerTeamList()
     return {
       dialogVisible: false,
       dialogPlayer: false,
       dialogDealPlayer: false,
+      loading:true,
+      baseUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
       teamId:'cba2020019',
-      playerTable: playerList,
-      teamList: teamList_,
+      playerTable: [],
+      teamList: [],
       radioSelect: '解约',
       team: {
         teamId: 'cba2020019',
@@ -179,17 +176,28 @@ export default {
   },
   created() {
      getCurSeason().then((res) => {
-        var parse = res.data
-        parse.teamId = this.teamId
-        this.info = Object.assign({}, parse)
-        getTeamInfo(parse).then((res)=>{
+        this.loading = false
+      })
+      getTeamList().then((res)=>{
+        this.teamList = res.data
+      })
+      var parse ={}
+      parse.teamId =  this.teamId
+      parse.page = 0
+      parse.pageSize = 100
+      getTeamInfo(parse).then((res)=>{
         this.team = res.data
-        console.log(this.team)
         })
+      getPlayersByTeamId(parse).then((res)=>{
+        this.playerTable = res.data.data
         this.loading = false
       })
   },
   methods: {
+    getLogoUrl(logo,playerId) {
+       if(logo===1)  return playerId
+      return '0'
+    },
     handleEdit() {
       this.$refs.editForm.setForm(this.team)
     },
