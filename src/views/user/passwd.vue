@@ -1,120 +1,129 @@
 <template>
-   <el-card style="margin:10px 10px 10px 10px;">
-  <div class="passwd-container">
-      <el-form ref="Form" :model="form" :rules="Rules"  auto-complete="on">
-      <el-form-item class="oldPasswd" prop="password" label=" 旧密码  :" >
-        <el-input
-         ref="password"
-         :type="passwordType"
-         placeholder="请输入密码"
-         v-model="form.oldPasswd" />
-          <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
-      </el-form-item>
-        <el-form-item class = "newPasswd" prop="password" label=" 新密码  : " >
-        <el-input
-          :key="newType"
-          ref="password"
-          v-model="form.newPasswd"
-          :type="newType"
-          placeholder="请输入新的密码"
-          name="newPassword"
-          tabindex="2"
-          auto-complete="on"
-        />
-        <span class="show-pwd" @click="showNewPwd">
-          <svg-icon :icon-class="newType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
-      </el-form-item>
-         <el-form-item class = "againPasswd" prop="password" label="确认密码:">
-        <el-input 
-          :key="againType"
-          ref="password"
-          v-model="form.againPasswd"
-          :type="againType"
-          placeholder="确认新的密码"
-          name="againPassword"
-          tabindex="2"
-          auto-complete="on"
-        />
-        <span class="show-pwd" @click="showAgainPwd">
-          <svg-icon :icon-class="againType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
-      </el-form-item>
-      <el-form-item class="button">
-         <el-button  type="success" round plain @click="onReSet" icon="el-icon-refresh-left" >重置</el-button>
-        <el-button  type="primary" round plain   @click="onSubmit" icon="el-icon-check" >确认</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
-   </el-card>
+  <el-card style="margin:10px 10px 10px 10px;">
+      <el-form ref="form" :model="form" :rules="Rules" style="margin-left:5%;width:50%;" auto-complete="on">
+        <el-form-item prop="oldPasswd" label=" 原 密 码  :">
+          <el-input
+            type="password"
+            placeholder="请输入密码"
+            :show-password="true"
+            style="width: 70%;"
+            v-model="form.oldPasswd"
+          />
+        </el-form-item>
+        <el-form-item prop="newPasswd" label=" 新 密 码 :">
+          <el-input
+            v-model="form.newPasswd"
+            type="password"
+            placeholder="请输入新的密码"
+            :show-password="true"
+            style="width: 70%;"
+          />
+        </el-form-item>
+        <el-form-item prop="againPasswd" label="确认密码:">
+          <el-input
+            v-model="form.againPasswd"
+            type="password"
+            placeholder="确认新的密码"
+            :show-password="true"
+            style="width: 70%;"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button style="float:right;margin-right:17%;" type="primary" round plain @click="onSubmit">确认</el-button>
+        </el-form-item>
+      </el-form>
+  </el-card>
 </template>
 
 <script>
+import { getToken } from '@/utils/auth'
+import { getInfo, altPwd } from '@/api/user'
 export default {
   data() {
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+    var validatePasssWd = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        if (value.length < 6 || value.length > 16) {
+          callback(new Error('长度至少6位,不超过16位'))
+        }
+        callback()
+      }
+    }
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入新密码'))
+      } else {
+        if (value.length < 6 || value.length > 16) {
+          callback(new Error('长度至少6位,不超过16位'))
+        } else {
+          if (this.form.againPasswd !== '') {
+            this.$refs.form.validateField('againPasswd')
+          }
+        }
+        callback()
+      }
+    }
+    var validateCheckPass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.form.newPasswd) {
+        callback(new Error('两次输入密码不一致!'))
       } else {
         callback()
       }
     }
     return {
       form: {
+        userId:'',
         oldPasswd: '',
         newPasswd: '',
-        againPasswd: ''
+        againPasswd: '',
       },
       Rules: {
-        oldPasswd: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        oldPasswd: [
+          { required: true, trigger: 'blur', validator: validatePasssWd },
+        ],
+         newPasswd: [
+          { required: true, trigger: 'blur', validator: validatePass },
+        ],
+         againPasswd: [
+          { required: true, trigger: 'blur', validator: validateCheckPass },
+        ],
       },
       loading: false,
-      passwordType: 'password',
-      newType: 'password',
-      againType: 'password',
-      redirect: undefined
     }
   },
+  created(){
+    var token = getToken()
+    getInfo(token).then((res) => {
+      this.form.userId = res.data.userId
+    })
+  },
   methods: {
-    showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
-      } else {
-        this.passwordType = 'password'
-      }
-    },
-    showNewPwd() {
-      if (this.newType === 'password') {
-        this.newType = ''
-      } else {
-        this.newType = 'password'
-      }
-      this.$nextTick(() => {
-        this.$refs.password.focus()
-      })
-    },
-    showAgainPwd() {
-      if (this.againType === 'password') {
-        this.againType = ''
-      } else {
-        this.againType = 'password'
-      }
-      this.$nextTick(() => {
-        this.$refs.password.focus()
-      })
-    },
     onSubmit() {
-      this.$message('submit!')
-    },
-    onReSet() {
-      this.$message({
-        message: 'cancel!',
-        type: 'warning'
+      this.$refs.form.validate((valid) => {
+        if (valid) {  
+            altPwd(this.form).then((res) => {
+              if (res.code == 200) {
+                this.form.oldPasswd = ''
+                this.form.newPasswd =''
+                this.form.againPasswd =''
+                this.$notify({
+                  type: 'success',
+                  message: '修改成功',
+                })
+              }
+            })
+        } else {
+           this.$message({
+             type:'error',
+             message:'请输入密码'
+           })
+        }
       })
     }
-  }
+  },
 }
 </script>
 
@@ -124,42 +133,12 @@ $cursor: #fff;
   .el-input {
     display: inline-block;
     height: 47px;
-    width:70%;
+    width: 70%;
   }
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
+  span {
+    &:first-of-type {
+      margin-right: 16px;
     }
-     .show-pwd {
-    position: absolute;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left:5px;
-    user-select: none;
-  }
-}
-.button{
-  margin-left: 55%;
-  margin-top:100px;
- text-align: center;
-}
-
-.oldPasswd{
-  margin-top:50px;
-  margin-left:30px;
-}
-.newPasswd{
-  margin-top:30px;
-  margin-left:30px;
-}
-.againPasswd{
-  margin-top:30px;
-  margin-left:20px;
-  .el-input {
-    display: inline-block;
-    height: 47px;
-    width:69.5%;
   }
 }
 </style>

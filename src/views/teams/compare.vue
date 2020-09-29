@@ -48,7 +48,7 @@
                 <div style="float:left;margin-left:20px;">
                   <el-image
                     style="width: 170px; height: 170px"
-                    :src="'team/' + queryForm.home +'.png'"
+                    :src="teamUrl+ queryForm.home +'.png'"
                     fit
                   ></el-image>
                 </div>
@@ -75,7 +75,7 @@
                 <div style="float:right;margin-right:20px;">
                   <el-image
                     style="width: 170px; height: 170px"
-                    :src="'team/' + queryForm.away +'.png'"
+                    :src="teamUrl + queryForm.away +'.png'"
                     fit
                   ></el-image>
                 </div>
@@ -191,6 +191,7 @@ export default {
       // base
       vDisabled: false,
       upLoading: true,
+      teamUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
       teamList: [],
       season: {},
       leftName: '',

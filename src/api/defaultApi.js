@@ -7,7 +7,7 @@ import request from '@/utils/request'
 export function dfTeamSortList(parse) {
     parse = {season:"2019-2020"}
   return request({
-    url: '/api/home/sort',
+    url: 'api/home/sort',
     method: 'post',
     data:parse
   })

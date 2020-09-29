@@ -9,7 +9,7 @@
             style="background-color: #FFF;"
             shape="square"
             :size="70"
-            :src="'team/' + homeId + '.png'"
+            :src="teamUrl + homeId + '.png'"
           />
         </el-link>
         <span class="match-header-span">
@@ -34,7 +34,7 @@
             style="background-color: #FFF;"
             shape="square"
             :size="70"
-            :src="'team/' + awayId + '.png'"
+            :src="teamUrl + awayId + '.png'"
           />
         </el-link>
       </div>
@@ -141,7 +141,7 @@
           style="background-color: #FFF;"
           shape="square"
           :size="45"
-          :src="'team/' + homeId + '.png'"
+          :src="teamUrl + homeId + '.png'"
         />
       </div>
       <el-table
@@ -168,7 +168,7 @@
           fit
           shape="square"
           :size="45"
-          :src="'team/' + awayId +'.png'"
+          :src="teamUrl + awayId +'.png'"
         />
       </div>
       <el-table
@@ -197,7 +197,8 @@ export default {
   data() {
     return {
       loading: true,
-      match: { matchId: '100001352' },
+      teamUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
+      match: { matchId: '' },
       season: '2019-2020',
       status: '1',
       date: '2020-09-05 14:50',
@@ -215,6 +216,7 @@ export default {
   },
   created() {
     this.init()
+    this.match.matchId = this.$route.params.matchId
   },
   methods: {
     init() {

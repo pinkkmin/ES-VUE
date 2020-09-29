@@ -213,6 +213,7 @@ export default {
     }
   },
   created() {
+    this.playerId = this.$route.params.playerId
     this.init()
   },
   name: 'app1',

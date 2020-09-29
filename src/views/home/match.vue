@@ -35,9 +35,9 @@
         <el-table-column prop="awayId">
           <template slot-scope="scope">
             <el-avatar
-              style="background-color:#fff;"
+              style="background-color:#ffffff;"
               :size="65"
-              :src="'team/' + item.data[scope.$index].awayId+ '.png'"
+              :src="teamUrl + item.data[scope.$index].awayId+ '.png'"
             />
           </template>
         </el-table-column>
@@ -71,12 +71,18 @@
             <el-avatar
               style="background-color:#fff;"
               :size="65"
-              :src="'team/' + item.data[scope.$index].homeId+ '.png'"
+              :src="teamUrl + item.data[scope.$index].homeId+ '.png'"
             />
           </template>
         </el-table-column>
         <el-table-column prop="data" label="数据统计">
-          <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
+         <template scope="scope">
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_match', params:{ matchId:item.data[scope.$index].matchId}}"
+            >赛后数据</router-link>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -84,11 +90,13 @@
 </template>
 
 <script>
-import { getMatchsByDay, getCurSeason } from '@/api/global'
+import { getMatchsByDay } from '@/api/global'
+import { getSeason } from '@/utils/auth'
 export default {
   data() {
     return {
       loading: true,
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
       queryForm: {
         month: '',
         season: '',
@@ -100,10 +108,9 @@ export default {
     var now = new Date().toLocaleDateString()
     var ym = now.split('/')
     this.queryForm.month = ym[0] + '-' + ym[1]
-    getCurSeason().then((res) => {
-      this.queryForm.season = res.data.season
-      this.getMatchList()
-    })
+    var parse = JSON.parse(getSeason())
+    this.queryForm.season = parse.season
+    this.getMatchList()
   },
   watch: {
     'queryForm.month': {
@@ -120,7 +127,7 @@ export default {
         .then((res) => {
           this.matchList = res.data
           this.$notify({
-            title: '编辑提示',
+            title: '提示',
             message: res.message,
             type: 'success',
             duration: 1700,

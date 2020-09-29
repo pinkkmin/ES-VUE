@@ -21,11 +21,17 @@
         </el-table-column>
         <el-table-column prop="awayId">
           <template slot-scope="scope">
-            <el-avatar
-              style="background-color:#fff;"
-              :size="65"
-              :src="'team/' + item.data[scope.$index].awayId+ '.png'"
-            />
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_team', params:{ teamId:item.data[scope.$index].awayId}}"
+            >
+              <el-avatar
+                style="background-color:#fff;"
+                :size="65"
+                :src="teamUrl + item.data[scope.$index].awayId+ '.png'"
+              />
+            </router-link>
           </template>
         </el-table-column>
         <el-table-column prop="awayName">
@@ -55,15 +61,27 @@
         </el-table-column>
         <el-table-column prop="homeId">
           <template slot-scope="scope">
-            <el-avatar
-              style="background-color:#fff;"
-              :size="65"
-              :src="'team/' + item.data[scope.$index].homeId+ '.png'"
-            />
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_team', params:{ teamId:item.data[scope.$index].homeId}}"
+            >
+              <el-avatar
+                style="background-color:#fff;"
+                :size="65"
+                :src="teamUrl + item.data[scope.$index].homeId+ '.png'"
+              />
+            </router-link>
           </template>
         </el-table-column>
         <el-table-column prop="data" label="数据统计">
-          <el-link href="/404" target="_blank" :underline="false">赛后数据</el-link>
+          <template scope="scope">
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_match', params:{ matchId:item.data[scope.$index].matchId}}"
+            >赛后数据</router-link>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -74,13 +92,14 @@ export default {
   //父组件传过的数据
   props: {
     data: {},
-    name:''
+    name: '',
   },
   data() {
     return {
       // base
       elId: '', // 随机的id 在create()时生成
       macthDate: '',
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
     }
   },
   created() {

@@ -5,9 +5,13 @@
 <template>
   <div v-loading="loading" :id="elId">
     <div v-loading="loading" style="float:left;margin-left:10px;width:110px;">
-      <el-link href="https://element.eleme.io" target="_blank" :underline="false">
+        <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_player', params:{ playerId:AnalysisData.playerId}}"
+            >
         <img style="background-color: #FFF;width:110px;" :src="logoUrl" :key="logoUrl" />
-      </el-link>
+        </router-link>
       <el-tag style="font-size:18px;margin-top:10px;">{{ AnalysisData.name }}</el-tag>
       <el-tag
         type="success"

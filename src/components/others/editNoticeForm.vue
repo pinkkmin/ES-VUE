@@ -129,7 +129,7 @@ export default {
           {
             min: 3,
             max: 45,
-            message: '长度在 3 到 140 个字符',
+            message: '长度在 2 到 20个字符',
             trigger: 'blur',
           },
         ],

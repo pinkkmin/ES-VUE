@@ -9,7 +9,7 @@
       >
         <el-tab-pane>
           <span slot="label" style="font-size:20px;">
-            <i class="el-icon-date" />今日比赛
+            <i class="el-icon-date" />近期比赛
           </span>
           <div
             style="color: #89177D;margin-top:2%;float:left;vertical-align: middle; font-size:35px;"
@@ -24,62 +24,81 @@
       </el-tabs>
       <div class="home-header-carousel">
         <el-carousel height="120px" v-loading="matchLoading">
-          <el-carousel-item class="main-carousel-item" v-for="(item,index) in match.data" :key="'match-'+index">
-            <el-badge
-              style="width:50px;margin-top:10px;margin-left:5px;float:left;"
-              :value="'time：'+item.time"
-              class="item"
-            />
-            <el-tag
-              v-if="item.status===1"
-              effect="dark"
-              style="width:80px;margin-top:5px;margin-right:5px;font-size:15px;float:right;"
+          <el-carousel-item
+            class="main-carousel-item"
+            v-for="(item,index) in match.data"
+            :key="'match-'+index"
+          >
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{name: 'public_match', params:{ matchId:item.matchId}}"
             >
-              <i class="el-icon-paperclip" />已结束
-            </el-tag>
-            <el-tag
-              v-else
-              effect="dark"
-              type="success"
-              style="width:80px;margin-top:5px;margin-right:5px;font-size:15px;float:right;"
-            >
-              <i class="el-icon-paperclip"></i>未开始
-            </el-tag>
-            <div style="float:left;margin-top:20px;margin-left:10px;width:45%">
-              <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-                <el-avatar
-                  style="background-color: #fff;"
-                  shape="square"
-                  :size="95"
-                  :src="'team/' + item.homeId + '.png'"
-                />
-              </el-link>
-              <span class="match-carousel-span">
-                <span style="margin-right:15px;">{{ item.homeName }}</span>
-                <span v-if="item.status ===1">
-                  <span v-if="item.homeScore > item.awayScore">{{ item.homeScore }}</span>
-                  <span v-else style="color:#7D7B73;">{{ item.homeScore }}</span>
-                </span>
-                <span style="margin-left:50px;">VS</span>
-              </span>
-            </div>
-            <div style="float:left;margin-top:20px;width:40%">
-              <span class="match-carousel-span">
-                <span v-if="item.status ===1">
-                  <span v-if="item.homeScore < item.awayScore">{{ item.awayScore }}</span>
-                  <span v-else style="color:#7D7B73;">{{ item.awayScore }}</span>
-                </span>
-                <span style="margin-left:20px;">{{ item.awayName }}</span>
-              </span>
-              <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-                <el-avatar
-                  style="background-color:#fff;"
-                  shape="square"
-                  :size="95"
-                  :src="'team/' + item.awayId + '.png'"
-                />
-              </el-link>
-            </div>
+              <el-badge
+                style="width:50px;margin-top:10px;margin-left:5px;float:left;"
+                :value="'time：'+item.time"
+                class="item"
+              />
+              <el-tag
+                v-if="item.status===1"
+                effect="dark"
+                style="width:80px;margin-top:5px;margin-right:5px;font-size:15px;float:right;"
+              >
+                <i class="el-icon-paperclip" />已结束
+              </el-tag>
+              <el-tag
+                v-else
+                effect="dark"
+                type="success"
+                style="width:80px;margin-top:5px;margin-right:5px;font-size:15px;float:right;"
+              >
+                <i class="el-icon-paperclip"></i>未开始
+              </el-tag>
+              <div style="float:left;margin-top:20px;margin-left:10px;width:40%">
+                <router-link
+                  target="_blank"
+                  :underline="false"
+                  style="float:left;"
+                  :to="{name: 'public_team', params:{ teamId:item.homeId}}"
+                >
+                  <el-avatar
+                    style="background-color: #fff;"
+                    shape="square"
+                    :size="95"
+                    :src="teamUrl + item.homeId + '.png'"
+                  />
+                </router-link>
+                <div class="match-carousel-span">
+                  <span style="margin-right:15px;">{{ item.homeName }}</span>
+                  <span v-if="item.status ===1">
+                    <span v-if="item.homeScore > item.awayScore">{{ item.homeScore }}</span>
+                    <span v-else style="color:#7D7B73;">{{ item.homeScore }}</span>
+                  </span>
+                  <span style="margin-left:50px;">VS</span>
+                </div>
+              </div>
+              <div style="float:right;margin-top:20px;width:40%">
+                <router-link
+                  target="_blank"
+                  :underline="false"
+                  :to="{name: 'public_team', params:{ teamId:item.awayId}}"
+                >
+                  <el-avatar
+                    style="background-color:#fff;"
+                    shape="square"
+                    :size="95"
+                    :src="teamUrl+ item.awayId + '.png'"
+                  />
+                </router-link>
+                <div class="match-carousel-right">
+                  <span v-if="item.status ===1">
+                    <span v-if="item.homeScore < item.awayScore">{{ item.awayScore }}</span>
+                    <span v-else style="color:#7D7B73;">{{ item.awayScore }}</span>
+                  </span>
+                  <span style="margin-left:20px;">{{ item.awayName }}</span>
+                </div>
+              </div>
+            </router-link>
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -90,12 +109,12 @@
           <i class="el-icon-message-solid" style="font-size: 25px; color: #89177D" />
           <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">公告栏</span>
         </el-card>
-        <el-collapse accordion >
+        <el-collapse accordion v-loading="loading">
           <el-collapse-item
             v-for="(item,index) in notice.data"
             :key="'notice-'+index"
             :title="' (๑•́ωก̀๑) ' + item.title +  '\t' + item.date"
-            :name="item.title"
+            :name="item.title+item.date"
           >
             <el-tag
               type="success"
@@ -105,18 +124,18 @@
             >发布者：{{ item.auth }}</el-tag>
             <el-tag
               effect="dark"
-              v-if="item.home.teamId!=''"
+              v-if="item.home.homeId!=''&&item.home.homeId!=null"
               size="medium"
               style="margin-left:10px"
-            >球队：{{ item.home.teamName }}</el-tag>
+            >球队：{{ item.home.homeName }}</el-tag>
             <el-tag
               effect="dark"
-              v-if="item.away.teamId!=''"
+              v-if="item.away.awayId!=''&&item.away.awayId!=null"
               size="medium"
               style="margin-left:10px"
-            >球队：{{ item.away.teamName }}</el-tag>
+            >球队：{{ item.away.awayName }}</el-tag>
             <el-tag
-              v-if="item.player.playerName!=''"
+              v-if="item.player.playerName!=''&&item.player.playerName!=null"
               size="medium"
               style="margin-left:10px"
             >#{{ item.player.playerName }}</el-tag>
@@ -129,10 +148,10 @@
           @current-change="handleCurrentChange"
           @prev-click="handlePreChange"
           @next-click="handleNextChange"
-          :hide-on-single-page="true"
-          layout="total,prev, pager, next,jumper"
+          layout="total, prev, pager, next,jumper"
+          :current-page.sync="queryForm.page"
           :total="notice.count"
-          :page-size="10"
+          :page-size="20"
         />
       </div>
       <div class="home-table">
@@ -140,14 +159,14 @@
           <i class="el-icon-medal-1" style="font-size: 25px; color: #89177D" />
           <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">积分榜</span>
         </el-card>
-        <el-table :data="team" stripe style="width: 100%"  v-loading="teamLoading">
+        <el-table :data="team" stripe style="width: 100%" v-loading="teamLoading">
           <el-table-column prop="indexLeft" label="排名" width="50">
             <template slot-scope="scope">
               <el-tag color="#37a2da" effect="dark">{{ team[scope.$index].indexLeft }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="teamLeft" label="球队" />
-          <el-table-column prop="wfLeft" label="胜负"  />
+          <el-table-column prop="wfLeft" label="胜负" />
 
           <el-table-column prop="indexRight" label="排名" width="60">
             <template slot-scope="scope">
@@ -156,7 +175,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="teamRight" label="球队" />
-          <el-table-column prop="wfRight" label="胜负"  />
+          <el-table-column prop="wfRight" label="胜负" />
         </el-table>
       </div>
     </div>
@@ -164,81 +183,90 @@
 </template>
 
 <script>
-import { validNoticeList } from '@/utils/validate'
 import { teamSortList, getTodayMatch } from '@/api/home'
-import { getCurSeason } from '@/api/global'
+import { queryNotices } from '@/api/manager'
+import { getSeason } from '@/utils/auth'
 export default {
   data() {
-    const matchData = {
-      count: 0,
-      data: [
-        {
-          matchId: 'cba2020001',
-          homeName: '主队',
-          homeId: 'cba2020002',
-          awayName: '客队',
-          awayId: 'cba2020001',
-          homeScore: 123,
-          awayScore: 112,
-          status: 0,
-          time: '09:00',
-        }
-      ],
-    }
-    const notice_ = validNoticeList()
     return {
-      matchLoading:true,
-      teamLoading:true,
-      curSeason: { season: '' },
-      match: matchData,
-      team: '',
-      notice: notice_,
-      pagination: {
-        // 分页
-        total: 50,
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
+      matchLoading: true,
+      teamLoading: true,
+      loading: true,
+      curSeason: {},
+      match: [],
+      team: [],
+      notice: {
+        count: 100,
+        data: [],
+      },
+      queryForm: {
+        playerName: '',
+        teamId: '',
+        page: 0,
+        pageSize: 20,
       },
     }
   },
   created() {
-    this.init()
+    this.curSeason = JSON.parse(getSeason())
+    //if (this.curSeason != {}) {
+      this.init()
+    //}
+    var parse = Object.assign({}, this.queryForm)
+    queryNotices(parse)
+      .then((qs) => {
+        this.notice = qs.data
+        this.loading = false
+      })
+      .catch(() => {
+        this.loading = false
+      })
   },
   methods: {
-    handleClick(){},
+    handleClick() {},
     init() {
-      // console.log(JSON.stringify(this.curSeason))
-      getCurSeason()
-        .then((res) => {
-          this.curSeason = res.data
-          teamSortList(this.curSeason).then((res) => {
-            this.team = res.data
-            this.teamLoading  =false
+      teamSortList(this.curSeason).then((res) => {
+        this.team = res.data
+        this.teamLoading = false
+      })
+      getTodayMatch().then((res) => {
+        this.match = res.data
+        this.matchLoading = false
+      })
+    },
+    query() {
+      this.loading = true
+      var parse = Object.assign({}, this.queryForm)
+      parse.page -= 1
+      queryNotices(parse)
+        .then((qs) => {
+          this.notice = qs.data
+          this.loading = false
+          this.$notify({
+            title: '查询提示',
+            message: '查询结果返回成功,共计' + qs.data.count + '条结果',
+            type: 'success',
+            duration: 1700,
           })
         })
         .catch(() => {
-          teamSortList({ season: '2019-2020' }).then((res) => {
-            this.team = res.data
-          })
+          this.loading = false
         })
-       
-        getTodayMatch().then((res)=>{
-          this.match = res.data
-          this.matchLoading  =false
-        })
-    },
-    getIcon() {
-      return 'http://mat1.gtimg.com/sports/nba/logo/1602/20187.png'
     },
     handleCurrentChange() {
-      this.loading = false
-      this.$message('now')
+      this.loading = true
+      this.query()
     },
     handlePreChange() {
-      this.$message('pre')
-      this.update()
+      this.queryForm.page -= 1
+      this.loading = true
+      this.query()
     },
     handleNextChange() {
-      this.update()
-      this.$message('next')
+      this.queryForm.page += 1
+      this.loading = true
+      this.query()
     },
   },
 }
@@ -294,8 +322,15 @@ export default {
 }
 .match-carousel-span {
   font-size: 31px;
-  margin-left: 10px;
   font-weight: bolder;
+  margin-top: 25px;
+  vertical-align: middle;
+}
+.match-carousel-right {
+  font-size: 31px;
+  float: left;
+  font-weight: bolder;
+  margin-top: 25px;
   vertical-align: middle;
 }
 .match-carousel-header {
@@ -315,9 +350,9 @@ export default {
   font-size: 20px;
 }
 .main-carousel-item:nth-child(2n-1) {
-  background: url(/background/match7.png);
+  background: url(https://es-1301702299.cos.ap-nanjing.myqcloud.com/background/match7.png);
 }
 .main-carousel-item:nth-child(2n) {
-  background: url(/background/match6.png);
+  background: url(https://es-1301702299.cos.ap-nanjing.myqcloud.com/background/match6.png);
 }
 </style>

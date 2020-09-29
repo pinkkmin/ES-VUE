@@ -11,11 +11,14 @@
     v-loading="loading"
   >
     <el-tab-pane v-loading="loading" label="阵 容">
-      <el-card v-loading="loading" style="height:180px;width:100%;background: url(/background/back5.png);">
+      <el-card
+        v-loading="loading1"
+        style="height:180px;width:100%;background: url(https://es-1301702299.cos.ap-nanjing.myqcloud.com/background/back5.png);"
+      >
         <div style="float:left;width:40%">
           <el-avatar
             :size="150"
-            :src="'team/' + team.teamId + '.png'"
+            :src="teamUrl + team.teamId + '.png'"
             style="float:left;background-color:#FFF"
             shape="square"
           />
@@ -86,14 +89,14 @@
       </el-card>
     </el-tab-pane>
     <el-tab-pane label="赛 程">
-      <matchModule :data="matchList" :name ="team.teamName" />
+      <matchModule :data="matchList" :name="team.teamName" />
     </el-tab-pane>
     <el-tab-pane label="数 据">
       <el-card style="height:280px;" v-loading="loading">
         <div style="float:left; width:150px;">
           <img
             style="float:left; width:110px;margin-bottom:10px;"
-            :src="'team/' + team.teamId + '.png'"
+            :src="teamUrl + team.teamId + '.png'"
           />
           <span
             style="float:left;margin:10px 0px 0px 10px;font-size:23px;font-weight: bolder;vertical-align: middle;"
@@ -146,7 +149,7 @@
       </div>
     </el-tab-pane>
     <el-tab-pane label="人 员 变 动">
-      <timeLine :timeLine="timeLineData" />
+      <timeLine />
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -169,9 +172,9 @@ import {
   getTeamThirdCard,
 } from '@/api/home'
 import { getCurSeason } from '@/api/global'
-import { getMatchs, getPlayers,getTeamInfo } from '@/api/team'
-/*mock data */
-import { validTimeLine } from '@/utils/validate'
+import { getMatchs, getPlayers, getTeamSortInfo } from '@/api/team'
+import { getToken } from '@/utils/auth'
+import { getInfo, altPwd } from '@/api/user'
 export default {
   // 组件
   components: {
@@ -183,12 +186,15 @@ export default {
     timeLine,
   },
   data() {
-    const timeLineData_ = validTimeLine()
     return {
+      //base
       loading: true,
+      loading1: true,
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
+      ////////
       info: '',
       teamInfo: {
-        teamId: 'cba2020012',
+        teamId: 'cba2020015',
         teamName: '',
       },
       queryForm: {
@@ -223,11 +229,14 @@ export default {
       seasonTable: [],
       matchList: {},
       playerList: [],
-      timeLineData: timeLineData_,
     }
   },
   created() {
-    this.init()
+    var token = getToken()
+    getInfo(token).then((res) => {
+      this.teamInfo = res.data.team
+      this.init()
+    })
   },
   methods: {
     getMatchList() {
@@ -253,7 +262,6 @@ export default {
         getTeamFisrtCard(parse).then((res) => {
           this.radarData = res.data.radarData
           this.barData = res.data.barData
-        //  console.log(JSON.stringify(res.data.team))
           this.drawChart()
           this.drawWf()
         })
@@ -265,9 +273,9 @@ export default {
         })
         this.getMatchList()
         this.getPlayerList()
-        getTeamInfo(this.info).then((res)=>{
+        getTeamSortInfo(this.info).then((res) => {
           this.team = res.data
-          //console.log(this.team)
+          this.loading1 = false
         })
         this.loading = false
       })
@@ -359,7 +367,7 @@ export default {
     query() {
       alert('submit!')
     },
-  }
+  },
 }
 </script>
 

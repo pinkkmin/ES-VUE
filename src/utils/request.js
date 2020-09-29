@@ -1,3 +1,7 @@
+/*
+ * @Descripttion: 
+ * @Date: 2020-07-22 16:31:15
+ */
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
@@ -50,7 +54,7 @@ service.interceptors.response.use(
       Message({
         message: res.message || 'Error',
         type: 'error',
-        duration: 5 * 1000
+        duration: 7 * 1000 // 5--》7
       })
 
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;

@@ -251,6 +251,6 @@ export default {
   float: left;
   margin-top: 5px;
   width: 100%;
-  background: url(/background/back15.png);
+  background: url(https://es-1301702299.cos.ap-nanjing.myqcloud.com/background/back15.png);
 }
 </style>

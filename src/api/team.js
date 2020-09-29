@@ -37,7 +37,13 @@ export function getTeamInfo(data_) {
     data:data_
   })
 }
-
+export function getTeamSortInfo(data_) {
+  return request({
+    url: 'api/global/teamInfo',
+    method: 'post',
+    data:data_  
+  })
+}
 export function lastSevenMatch(data_) {
   return request({
     url: 'api/team/analysis/lastSeven',
@@ -88,6 +94,21 @@ export function compareMatch(data_) {
 export function getPlayersByTeamId(data_) {
   return request({
     url: 'api/global/playerList',
+    method: 'post',
+    data:data_
+  })
+}
+
+export function teamService(data_) {
+  return request({
+    url: 'api/manager/service',
+    method: 'post',
+    data:data_
+  })
+}
+export function queryService(data_) {
+  return request({
+    url: 'api/manager/queryService',
     method: 'post',
     data:data_
   })

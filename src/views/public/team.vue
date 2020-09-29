@@ -16,7 +16,7 @@
         <div style="float:left; width:150px;">
           <img
             style="float:left; width:110px;margin-bottom:10px;"
-            :src="'team/' + team.teamId + '.png'"
+            :src="teamUrl + team.teamId + '.png'"
           />
           <span
             style="float:left;margin-left:10px;font-size:23px;font-weight: bolder;vertical-align: middle;"
@@ -119,10 +119,11 @@ export default {
       // base
       loading: true,
       tabValue:'data',
+      teamUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
       seasonInfo:'',
       // first card : teamInfo + radarChart + barChart 球队信息 + 雷达图 + 柱状图
       team: {
-        teamId: 'cba2020019',
+        teamId: 'cba2020000',
         teamName: '球队名称',
         win: 0,
         fail: 0,
@@ -160,7 +161,7 @@ export default {
       seasonTable: [],
       // to sub matchModule
       teamInfo: {
-        teamId: 'cba2020019',
+        teamId: '',
         teamName: '',
       },
       matchList:{},
@@ -168,6 +169,7 @@ export default {
     }
   },
   created() {
+    this.teamInfo.teamId = this.$route.params.teamId
     this.init()
   },
   methods: {

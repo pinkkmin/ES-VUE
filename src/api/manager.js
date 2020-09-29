@@ -5,18 +5,53 @@
 import request from '@/utils/request'
 export function queryMatchInfo(data_) {
     return request({
-      url: 'http://localhost:8080/api/manager/queryMatch',
+      url: 'api/manager/queryMatch',
       method: 'post',
       data:data_
     })
  }
  export function queryPlayers(data_) {
     return request({
-      url: 'http://localhost:8080/api/manager/queryPlayer',
+      url: 'api/manager/queryPlayer',
       method: 'post',
       data:data_
     })
  }
+ export function queryFreePlayers(data_) {
+  return request({
+    url: 'api/manager/queryFreePlayers',
+    method: 'post',
+    data:data_
+  })
+}
+export function addFreePlayers(data_) {
+  return request({
+    url: 'api/manager/addPlayers',
+    method: 'post',
+    data:data_
+  })
+}
+ export function editPlayer(data_) {
+  return request({
+    url: 'api/team/editPlayer',
+    method: 'post',
+    data:data_
+  })
+}
+export function createPlayer(data_) {
+  return request({
+    url: 'api/manager/createPlayer',
+    method: 'post',
+    data:data_
+  })
+}
+export function dealPlayer(data_) {
+  return request({
+    url: 'api/manager/dealPlayer',
+    method: 'post',
+    data:data_
+  })
+}
  export function queryNotices(data_) {
     return request({
       url: 'api/manager/queryNotice',
@@ -60,6 +95,35 @@ export function publish(data_) {
     data:data_
   })
 }
+//////////////
+export function editMatch(data_) {
+  return request({
+    url: 'api/manager/editMatch',
+    method: 'post',
+    data:data_
+  })
+}
+export function editMatchData(data_) {
+  return request({
+    url: 'api/manager/editMatchData',
+    method: 'post',
+    data:data_
+  })
+}
+///// 查询-未录入数据的比赛
+export function queryNoMatch(data_) {
+  return request({
+    url: 'api/manager/queryNoMatch',
+    method: 'post',
+    data:data_
+  })
+}
 
-
-
+//// 录入赛事数据
+export function insertMatchData(data_) {
+  return request({
+    url: 'api/manager/insertMatchData',
+    method: 'post',
+    data:data_
+  })
+}

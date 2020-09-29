@@ -227,35 +227,32 @@ export const constantRoutes = [{
     }]
   },
   {
-    path: '/public',
+    path: '/match/:matchId',
     component: Layout,
-    meta: {
-      title: 'public'
-    },
     children: [{
-        path: 'team',
-        component: () => import('@/views/public/team'),
-        name: 'public_team',
-        meta: {
-          title: '球队'
-        }
-      },
-      {
-        path: 'player',
+      path: '',
+      name: 'public_match',
+      component: () => import('@/views/public/match'),
+    }, ]
+  },
+  {
+    path: '/team/:teamId',
+    component: Layout,
+    children: [{
+      path: '',
+      component: () => import('@/views/public/team'),
+      name: 'public_team',
+    }, ]
+  },
+  {
+    path: '/player/:playerId',
+    component: Layout,
+    children: [{
+        path: '',
         component: () => import('@/views/public/player'),
         name: 'public_player',
-        meta: {
-          title: '球员'
-        }
-      },
-      {
-        path: 'match',
-        component: () => import('@/views/public/match'),
-        name: 'public_match',
-        meta: {
-          title: '赛事'
-        }
       }
+
     ]
   },
   // 404 page must be placed at the end !!!

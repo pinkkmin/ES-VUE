@@ -29,9 +29,13 @@
                 <el-card class="box-card">
                   <div v-for="(item, index) in teamList" :key="index">
                     <div class="team-row">
-                      <el-link href="https://element.eleme.io" target="_blank" :underline="false">
-                        <el-avatar :size="40" :src="'team/' + item.teamId + '.png'" />
-                      </el-link>
+                      <router-link
+                        target="_blank"
+                        :underline="false"
+                        :to="{name: 'public_team', params:{ teamId:item.teamId}}"
+                      >
+                        <el-avatar :size="40" :src="teamUrl + item.teamId + '.png'" />
+                      </router-link>
                       <span style="font-size=17px;">{{ item.teamName }}</span>
                     </div>
                   </div>
@@ -53,6 +57,7 @@ export default {
   data() {
     return {
       teamList: '',
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
       listLoading: true,
     }
   },
@@ -68,7 +73,7 @@ export default {
         this.listLoading = false
       })
     },
-    handleCommand(){},
+    handleCommand() {},
     handleSelect(key, keyPath) {
       console.log(key, keyPath)
     },

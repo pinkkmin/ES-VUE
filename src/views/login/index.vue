@@ -48,7 +48,13 @@
       >登 录</el-button>
       <el-form-item style="margin-bottom:20px;background-color:#defff0;">
         <el-button type="success" style="float:left;" plain round @click="dialogVisible = true">立即注册</el-button>
-        <el-button type="primary" plain style="float:right;" round @click="passwdDdialog = true">找回密码</el-button>
+        <el-button
+          type="primary"
+          plain
+          style="float:right;"
+          round
+          @click="passwdDdialog = true"
+        >找回密码</el-button>
       </el-form-item>
     </el-form>
     <footer class="es-footer">
@@ -58,7 +64,7 @@
         <i class="el-icon-user" style="color:#67C23A;font-size:28px;">CMF & LSS</i>
       </div>
     </footer>
-    
+    <el-dialog :title="title" :visible.sync="dialogVisible" width="35%">
       <el-button
         v-show="!show"
         type="success"
@@ -88,16 +94,23 @@
             </el-form-item>
             <el-form-item prop="email" label="邮箱">
               <el-input placeholder="填写邮箱地址" clearable v-model="regForm.email">
-                <el-button slot="append" @click="getKeyNumber(regForm,0)">获取验证码</el-button>
+                <el-button
+                  :disabled="msgDisabled"
+                  slot="append"
+                  @click="getKeyNumber(regForm,0),doKeyTime(regForm.email,0)"
+                >{{megValue}}</el-button>
               </el-input>
             </el-form-item>
             <el-form-item prop="keyNumber" label="验证码">
-              <el-input placeholder v-model="regForm.keyNumber">
-                <span slot="suffix">秒后可重发</span>
-              </el-input>
+              <el-input placeholder v-model="regForm.keyNumber" />
             </el-form-item>
             <el-form-item prop="passwd" label="密码">
-              <el-input type="password" placeholder="填写密码" v-model="regForm.passwd" :show-password="true" />
+              <el-input
+                type="password"
+                placeholder="填写密码"
+                v-model="regForm.passwd"
+                :show-password="true"
+              />
             </el-form-item>
             <el-form-item prop="checkPass" label="确认密码">
               <el-input
@@ -136,16 +149,23 @@
         >
           <el-form-item prop="email" label="邮箱">
             <el-input placeholder="填写邮箱地址" clearable v-model="passForm.email">
-              <el-button slot="append" @click="getKeyNumber(passForm,1)">获取验证码</el-button>
+              <el-button
+                :disabled="pwdDisabled"
+                slot="append"
+                @click="getKeyNumber(passForm,1),doKeyTime(passForm.email,1)"
+              >{{pwdValue}}</el-button>
             </el-input>
           </el-form-item>
           <el-form-item prop="keyNumber" label="验证码">
-            <el-input placeholder v-model="passForm.keyNumber">
-              <span slot="suffix">秒后可重发</span>
-            </el-input>
+            <el-input placeholder v-model="passForm.keyNumber" />
           </el-form-item>
           <el-form-item prop="passwd" label="新密码">
-            <el-input type="password" placeholder="填写密码" :show-password="true" v-model="passForm.passwd" />
+            <el-input
+              type="password"
+              placeholder="填写密码"
+              :show-password="true"
+              v-model="passForm.passwd"
+            />
           </el-form-item>
           <el-form-item prop="checkPass" label="确认密码">
             <el-input
@@ -168,7 +188,7 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import { getTeamList } from '@/api/team'
-import { doKeyNumber,regKeyNumber,resetPwd,register } from '@/api/global'
+import { doKeyNumber, regKeyNumber, resetPwd, register } from '@/api/global'
 export default {
   name: 'Login',
   data() {
@@ -230,11 +250,17 @@ export default {
     }
     return {
       dialogVisible: false,
-      title:'用户注册',
+      title: '用户注册',
       show: false,
       show2: true,
       passwdDdialog: false,
       loading: false,
+      keyTime: 60,
+      keyTimePwd: 60,
+      megValue: '获取验证码',
+      pwdDisabled: false,
+      pwdValue: '获取验证码',
+      msgDisabled: false,
       passwordType: 'password',
       redirect: undefined,
       teamList: [
@@ -252,7 +278,7 @@ export default {
         passwd: '',
         checkPass: '',
         email: '',
-        role: '',
+        role: 0,
         teamId: 'cba2020001',
         keyNumber: '',
       },
@@ -324,6 +350,37 @@ export default {
     })
   },
   methods: {
+    doKeyTime(email, type) {
+      if (this.checkEmail(email)) {
+        if (type == 0) this.settime(this.keyTime, type)
+        else this.settime(this.keyTimePwd, type)
+      }
+    },
+    settime(key, type) {
+      if (key == 0) {
+        key = 60
+        if (type == 0) {
+          this.msgDisabled = false
+          this.megValue = '获取验证码'
+        } else {
+          this.pwdDisabled = false
+          this.pwdValue = '获取验证码'
+        }
+        return
+      } else {
+        if (type == 0) {
+          this.msgDisabled = true
+          this.megValue = key + '秒后重新发送'
+        } else {
+          this.pwdDisabled = true
+          this.pwdValue = key + '秒后重新发送'
+        }
+        key--
+      }
+      setTimeout(() => {
+        this.settime(key,type)
+      }, 1000)
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -355,10 +412,15 @@ export default {
     },
     handleReset() {
       this.$refs.passForm.validate((valid) => {
-        if (valid) {       
-        resetPwd(this.passForm).then((res)=>{
-          this.notice('success', res.message)
-        }) 
+        if (valid) {
+          resetPwd(this.passForm).then((res) => {
+            this.notice('success', '找回密码成功')
+            this.passwdDdialog = false
+            this.passForm.passwd = ''
+            this.passForm.checkPass = ''
+            this.passForm.email = ''
+            this.passForm.keyNumber = ''
+          })
         } else {
           return false
         }
@@ -367,7 +429,17 @@ export default {
     handleReg() {
       this.$refs.regForm.validate((valid) => {
         if (valid) {
-          this.notice('success', '注册请求')
+          register(this.regForm).then((res) => {
+            this.notice('success', '注册成功,请登录')
+            this.loginForm.username = this.regForm.userName
+            this.loginForm.password = this.regForm.passwd
+            this.regForm.passwd = ''
+            this.regForm.checkPass = ''
+            this.regForm.email = ''
+            this.regForm.keyNumber = ''
+            this.userName = ''
+            this.dialogVisible = false
+          })
         } else {
           return false
         }
@@ -381,25 +453,31 @@ export default {
         return false
       }
     },
-    getKeyNumber(form,type) {
-      var parse = Object.assign({},form)
-      parse.type = type 
+    getKeyNumber(form, type) {
+      var parse = Object.assign({}, form)
+      parse.type = type
       if (this.checkEmail(form.email)) {
-        if(type === 0){ //注册
-          regKeyNumber(parse).then((res)=>{
-          if(res.code === 200) {
-              this.notice('success', '验证码已发送, 5分钟内有效, 请留意邮箱查收')
-          }
-        })
+        if (type === 0) {
+          //注册
+          regKeyNumber(parse).then((res) => {
+            if (res.code === 200) {
+              this.notice(
+                'success',
+                '验证码已发送, 5分钟内有效, 请留意邮箱查收'
+              )
+            }
+          })
+        } else {
+          // 找回
+          doKeyNumber(parse).then((res) => {
+            if (res.code === 200) {
+              this.notice(
+                'success',
+                '验证码已发送, 5分钟内有效, 请留意邮箱查收'
+              )
+            }
+          })
         }
-        else {  // 找回
-          doKeyNumber(parse).then((res)=>{
-          if(res.code === 200) {
-              this.notice('success', '验证码已发送, 5分钟内有效, 请留意邮箱查收')
-          }
-        })
-        }
-        
       } else {
         this.notice('error', '请填写正确的邮箱地址')
       }
@@ -442,7 +520,7 @@ $cursor: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: #f1e4ff;
     border-radius: 5px;
-  } 
+  }
 }
 </style>
 
@@ -455,7 +533,7 @@ $light_gray: #eee;
   min-height: 100%;
   width: 100%;
   overflow: hidden;
-  background: url(/background/login.png);
+  background: url(https://es-1301702299.cos.ap-nanjing.myqcloud.com/background/login.png);
   .login-form {
     position: relative;
     width: 600px;

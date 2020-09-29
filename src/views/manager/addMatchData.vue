@@ -6,21 +6,20 @@
   <el-card style="margin: 10px 15px 100px 15px;">
     <el-form style="margin-top:15px;" :model="queryForm" :inline="true" ref="queryForm">
       <el-form-item label="日期" style="margin-left:3px;">
-        <el-select v-model="queryForm.date" clearable filterable placeholder="选择日期">
-          <el-option
-            v-for="(date,index) in dateList"
-            :key="'date-'+index"
-            :label="date"
-            :value="date"
-          />
-        </el-select>
+         <el-date-picker
+          v-model="queryForm.date"
+          type="date"
+          placeholder="选择日期"
+          format="yyyy年MM月dd日"
+          value-format="yyyy-MM-dd"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item label="主队" style="margin-left:3px;">
         <el-select v-model="queryForm.homeId" clearable filterable placeholder="选择主队">
           <el-option
             v-for="(item,index) in teamList"
             :key="'home-'+index "
-            :label="item.name"
+            :label="item.teamName"
             :value="item.teamId"
           />
         </el-select>
@@ -30,7 +29,7 @@
           <el-option
             v-for="(item,index) in teamList"
             :key="'away-'+index"
-            :label="item.name"
+            :label="item.teamName"
             :value="item.teamId"
           />
         </el-select>
@@ -42,20 +41,18 @@
     <el-table :data="matchTable" style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="scope">
-          <inputMatchData :data="matchTable[scope.$index]" />
+          <inputMatchData :data="matchTable[scope.$index]"  />
         </template>
       </el-table-column>
       <el-table-column prop="match.season" label="赛季" />
       <el-table-column prop="match.date" label="比 赛 日 期" />
-      <el-table-column prop="match.home.name" label="主队" />
+      <el-table-column prop="match.homeName" label="主队" />
       <el-table-column prop="match.homeScore" label="主队得分" />
       <el-table-column prop="match.awayScore" label="客队得分" />
-      <el-table-column prop="match.away.name" label="客队" />
+      <el-table-column prop="match.awayName" label="客队" />
       <el-table-column prop="match.status" label="状态">
-        <template slot-scope="scope">
-          <span v-if="matchTable[scope.$index].status === 1">已结束</span>
-          <span v-else-if="matchTable[scope.$index].status === 2">延期</span>
-          <span v-else>未开始</span>
+        <template>
+          <el-tag>已结束</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="录  入  操  作" width="180px;">
@@ -72,13 +69,13 @@
             type="success"
             size="mini"
             round
-            @click.native="submitMatchData()"
+            @click="submitMatchData(scope.$index)"
             style="float:right;font-size:13px;"
           >提 交</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="赛事管理-编辑" :visible.sync="dialogMatch" :before-close="handleClose">
+    <el-dialog title="录入赛事" :visible.sync="dialogMatch">
       <el-form :model="updateForm" ref="updateForm">
         <el-form-item label="选择文件">
           <el-upload
@@ -117,12 +114,12 @@
       </el-form>
     </el-dialog>
     <el-pagination
-      style="margin:50px 0px 20px 0px; margin-left:25%;"
+      style="margin:50px 0px 20px 0px; margin-left:35%;"
       background
       @current-change="handleCurrentChange"
       @prev-click="handlePreChange"
       @next-click="handleNextChange"
-      :hide-on-single-page="true"
+       :current-page.sync="queryForm.page"
       layout="total,prev, pager, next,jumper"
       :total="count"
       :page-size="10"
@@ -132,35 +129,44 @@
 
 <script>
 import { updateFile } from '@/api/global'
+import { queryNoMatch, insertMatchData } from '@/api/manager'
+import { getTeamList } from '@/api/team'
+import { getSeason } from '@/utils/auth'
 import inputMatchData from '@/components/others/inputMatchData.vue'
-import {
-  validInputMatchList,
-  validManagerTeamList,
-  validAddMatchData,
-} from '@/utils/validate'
 export default {
   components: {
     inputMatchData,
   },
   data() {
-    const match = validAddMatchData()
-    const teamList_ = validManagerTeamList()
     return {
       dialogMatch: false,
       updateIndex: 0,
       fileList: [],
-      matchTable: match.data,
-      count: match.count,
-      teamList: teamList_,
-      dateList: ['2020-9-1', '2020-9-3', '2020-9-4', '2020-9-6'],
+      matchTable: [],
+      count: 0,
+      teamList: [],
       queryForm: {
-        // 查询提交表单
+        season:'',
         date: '',
         homeId: '',
         awayId: '',
+        page:0,
+        pageSize:10,
       },
       updateForm: {},
     }
+  },
+  created(){
+    var parse = JSON.parse(getSeason())
+    this.queryForm.season = parse.season
+    getTeamList().then((res)=>{
+      this.teamList = res.data
+    })
+    var parse = Object.assign({},this.queryForm)
+    queryNoMatch(parse).then((res)=>{
+      this.count = res.data.count
+      this.matchTable = res.data.data
+    })
   },
   methods: {
     updateMatchFile() {
@@ -182,18 +188,8 @@ export default {
             message: '读取文件数据成功,可下拉检查。',
             duration: 3500,
           })
-          res.data.home.forEach(element => {
-           element.join = true
-         });
-          res.data.away.forEach(element => {
-           element.join = true
-         });
          this.matchTable[this.updateIndex].homeData = res.data.home
-         
          this.matchTable[this.updateIndex].awayData = res.data.away
-         // console.log("-------------------------")
-          // console.log(res)
-          console.log(res.data)
           this.dialogMatch = false
         })
         .catch(() => {
@@ -202,12 +198,10 @@ export default {
     },
     handleRemove(file, fileList) {},
     handlePreview(file) {
-      console.log(file)
     },
     handleChange(file, fileList) {},
     handleExceed(files, fileList) {
       this.$message.warning(`当前存在待上传文件,请先删除列表中的文件,再重新选择`)
-      //this.$refs.upload.handleRemove(fileList[0],fileList)
     },
     beforeRemove(file, fileList) {
       return true
@@ -219,38 +213,50 @@ export default {
       }
       return iscsv
     },
-    handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          done()
-        })
-        .catch((_) => {})
-    },
-    handleCurrentChange() {
-      this.loading = false
-      this.$message('now')
+     handleCurrentChange() {
+      this.loading = true
+      this.query()
     },
     handlePreChange() {
-      this.$message('pre')
-      this.update()
+      this.queryForm.page -= 1
+      this.loading = true
+      this.query()
     },
     handleNextChange() {
-      this.update()
-      this.$message('next')
+      this.queryForm.page += 1
+      this.loading = true
+      this.query()
     },
     // 查询已结束-未录入数据的比赛
-    query() {
-      alert('submit!')
+     query() {
+      this.loading = true
+      var parse = Object.assign({}, this.queryForm)
+      parse.page -= 1
+      queryNoMatch(parse).then((qs) => {
+         this.count = qs.data.count
+      this.matchTable = qs.data.data
+        this.loading = false
+        this.$notify({
+          title: '查询提示',
+          message: '查询结果返回成功,共计' + qs.data.count + '条结果',
+          type: 'success',
+          duration: 1700,
+        })
+      })
+      this.loading = false
     },
     // 提交赛事数据
-    submitMatchData() {
-      console.log(JSON.stringify(this.matchTable))
+    submitMatchData(index) {
       this.$confirm('确认提交, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then((_) => {
+          insertMatchData(this.matchTable[index]).then((res)=>{
+            this.query()
+          })
+          
           this.$notify({
             title: '提示',
             message: '提交比赛数据成功',

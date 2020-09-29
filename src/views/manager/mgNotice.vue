@@ -45,18 +45,18 @@
           >发布者：{{ item.auth }}</el-tag>
           <el-tag
             effect="dark"
-            v-if="item.home.homeId!=''"
+            v-if="item.home.homeId!=''&&item.home.homeId!=null "
             size="medium"
             style="margin-left:10px"
           >球队：{{ item.home.homeName }}</el-tag>
           <el-tag
             effect="dark"
-            v-if="item.away.awayId!=''"
+            v-if="item.away.awayId!=''&&item.home.awayId!=null"
             size="medium"
             style="margin-left:10px"
           >球队：{{ item.away.awayName }}</el-tag>
           <el-tag
-            v-if="item.player.playerName!=''"
+            v-if="item.player.playerName!=''&&item.player.playerName!=null"
             size="medium"
             style="margin-left:10px"
           >#{{ item.player.playerName }}</el-tag>

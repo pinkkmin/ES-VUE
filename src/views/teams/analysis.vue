@@ -4,7 +4,7 @@
       <div style="float:left; width:150px;">
         <img
           style="float:left; width:110px;margin-bottom:10px;"
-          :src="'team/' + team.teamId + '.png'"
+          :src="teamUrl + team.teamId + '.png'"
         />
         <span
           style="float:left;margin-left:10px;font-size:23px;font-weight: bolder;vertical-align: middle;"
@@ -52,7 +52,13 @@
       <span style="  padding-bottom: 20px; margin-left:10px;font-size: 19px; color: #89177D">赛季对比</span>
     </el-card>
     <div class="analysis-card" style="margin-top:2px;">
-      <el-tabs v-loading="yLoading" v-model="tabsValue_" :stretch="true" type="border-card" @tab-click="handleClick">
+      <el-tabs
+        v-loading="yLoading"
+        v-model="tabsValue_"
+        :stretch="true"
+        type="border-card"
+        @tab-click="handleClick"
+      >
         <el-tab-pane label="场均得分">
           <yBarChart
             :data="seasonData.scoreSeason"
@@ -151,7 +157,11 @@
         </el-tab-pane>
       </el-tabs>
     </div>
-    <el-card v-loading="stLoading" class="analysis-card" style="height:300px;margin-top:5px;margin-bottom:100px;">
+    <el-card
+      v-loading="stLoading"
+      class="analysis-card"
+      style="height:300px;margin-top:5px;margin-bottom:100px;"
+    >
       <el-table :data="seasonTable" stripe style="vertical-align:middle;width:100%">
         <el-table-column prop="season" label="赛季" />
         <el-table-column prop="score" label="场均得分" />
@@ -175,12 +185,14 @@ import analysisBestData from '@/components/others/AnalysisPane.vue'
 import baseline from '@/components/echart/baseLine.vue'
 import yBarChart from '@/components/echart/yBarChart.vue'
 //API
+import { getToken } from '@/utils/auth'
+import { getInfo, altInfo } from '@/api/user'
 import {
   getTeamFisrtCard,
   getTeamSecondCard,
   getTeamThirdCard,
 } from '@/api/home'
-import { lastSevenMatch, lastSeasonMatch,lastSeasonAvg } from '@/api/team'
+import { lastSevenMatch, lastSeasonMatch, lastSeasonAvg } from '@/api/team'
 import { getCurSeason } from '@/api/global'
 /*mock data */
 export default {
@@ -205,10 +217,11 @@ export default {
       blLoading: true,
       yLoading: true,
       stLoading: true,
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
       //data
       info: {},
       team: {
-        teamId: 'cba2020003',
+        teamId: '',
         teamName: '球队名称',
         win: 0,
         fail: 0,
@@ -276,42 +289,46 @@ export default {
     yBarChart,
   },
   created() {
-    this.init()
+     var token = getToken()
+        getInfo(token).then((res) => {
+          this.team.teamId  = res.data.team.teamId
+            this.init()
+        })
   },
   name: 'analysis_',
   methods: {
     init() {
       getCurSeason().then((res) => {
         var parse = res.data
-        parse.teamId = this.team.teamId
-        this.info = Object.assign({}, parse)
-        getTeamFisrtCard(parse).then((res) => {
-          this.team = res.data.team
-          this.fcLoading = false
-          this.radarData = res.data.radarData
-          this.drawChart()
-          this.barData = res.data.barData
+          parse.teamId = this.team.teamId
+          this.info = Object.assign({}, parse)
+          getTeamFisrtCard(parse).then((res) => {
+            this.team = res.data.team
+            this.fcLoading = false
+            this.radarData = res.data.radarData
+            this.drawChart()
+            this.barData = res.data.barData
+          })
+          getTeamSecondCard(parse).then((sec) => {
+            this.bestData = sec.data
+          })
+          lastSevenMatch(this.info).then((res) => {
+            this.baseLineData = res.data
+          })
+          lastSeasonMatch(this.info).then((res) => {
+            this.baseLineData_ = res.data
+            this.blLoading = false
+          })
+          lastSeasonAvg(this.info).then((sec) => {
+            this.seasonData = sec.data
+            this.yLoading = false
+            //console.log(this.seasonData)
+          })
+          getTeamThirdCard(this.info).then((sec) => {
+            this.seasonTable = sec.data
+            this.stLoading = false
+          })
         })
-        getTeamSecondCard(parse).then((sec) => {
-          this.bestData = sec.data
-        })
-        lastSevenMatch(this.info).then((res) => {
-          this.baseLineData = res.data
-        })
-        lastSeasonMatch(this.info).then((res) => {
-          this.baseLineData_ = res.data
-          this.blLoading = false
-        })
-         lastSeasonAvg(this.info).then((sec) => {
-         this.seasonData = sec.data
-         this.yLoading = false
-         //console.log(this.seasonData)
-        })
-         getTeamThirdCard(this.info).then((sec) => {
-          this.seasonTable = sec.data
-          this.stLoading = false
-        })
-      })
     },
     handleClick(tab, event) {},
     getPosition(value) {

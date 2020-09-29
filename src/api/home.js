@@ -27,21 +27,21 @@ export function getTodayMatch() {
 //for team
 export function getTeamFisrtCard(parse) {
   return request({
-    url: '/api/public/team/first',
+    url: 'api/public/team/first',
     method: 'post',
     data:parse
   })
 }
 export function getTeamSecondCard(parse) {
   return request({
-    url: '/api/public/team/second',
+    url: 'api/public/team/second',
     method: 'post',
     data:parse
   })
 }
 export function getTeamThirdCard(parse) {
   return request({
-    url: '/api/public/team/third',
+    url: 'api/public/team/third',
     method: 'post',
     data:parse
   })
@@ -49,7 +49,7 @@ export function getTeamThirdCard(parse) {
 //for match
 export function getMatchInfo(parse) {
   return request({
-    url: '/api/public/match',
+    url: 'api/public/match',
     method: 'post',
     data:parse
   })
@@ -58,14 +58,14 @@ export function getMatchInfo(parse) {
 //for player
 export function getPlayerInfo(parse) {
   return request({
-    url: '/api/public/player',
+    url: 'api/public/player',
     method: 'post',
     data:parse
   })
 }
 export function getPlayerSeasonData(parse) {
   return request({
-    url: '/api/public/player/season',
+    url: 'api/public/player/season',
     method: 'post',
     data:parse
   })

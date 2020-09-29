@@ -12,24 +12,24 @@
           <el-input style="font-size:17px;" placeholder="输入标题" v-model="publishForm.title"></el-input>
         </el-form-item>
         <el-form-item label="主队">
-          <el-select v-model="publishForm.home" clearable placeholder="请选择主队">
+          <el-select v-model="publishForm.homeId" clearable placeholder="请选择主队">
             <el-option
               v-for="(item,index) in teamList"
               :key="'home'+index"
               :label="item.teamName"
               :value="item.teamId"
-              :disabled="item.teamId===publishForm.away"
+              :disabled="item.teamId===publishForm.awayId"
             />
           </el-select>
         </el-form-item>
         <el-form-item label="客队" prop="away">
-          <el-select v-model="publishForm.away" clearable filterable placeholder="请选择客队">
+          <el-select v-model="publishForm.awayId" clearable filterable placeholder="请选择客队">
             <el-option
               v-for="(item,index) in teamList"
               :key="'away'+index"
               :label="item.teamName"
               :value="item.teamId"
-              :disabled="item.teamId===publishForm.home"
+              :disabled="item.teamId===publishForm.homeId"
             />
           </el-select>
         </el-form-item>
@@ -39,7 +39,7 @@
               v-for="group in playerList"
               :key="group.teamId"
               :label="group.teamName"
-              :disabled="(group.teamId!=publishForm.away&&publishForm.away!='')&&(publishForm.home!=''&&group.teamId!=publishForm.home)"
+              :disabled="(group.teamId!=publishForm.away&&publishForm.awayId!='')&&(publishForm.homeId!=''&&group.teamId!=publishForm.homeId)"
             >
               <el-option
                 v-for="(item,index) in group.data"
@@ -80,19 +80,19 @@
                 style="margin-left:5px"
               >发布者: {{ auth }}</el-tag>
               <el-tag
-                v-if="publishForm.home != ''"
+                v-if="publishForm.homeId != ''&&publishForm.homeId!=null"
                 effect="dark"
                 size="medium"
                 style="margin-left:10px"
-              >球队：{{ this.getTeamName(publishForm.home) }}</el-tag>
+              >球队：{{ this.getTeamName(publishForm.homeId) }}</el-tag>
               <el-tag
-                v-if="publishForm.away != ''"
+                v-if="publishForm.awayId != ''&&publishForm.awayId!=null"
                 effect="dark"
                 size="medium"
                 style="margin-left:10px"
-              >球队：{{ this.getTeamName(publishForm.away) }}</el-tag>
+              >球队：{{ this.getTeamName(publishForm.awayId) }}</el-tag>
               <el-tag
-                v-if="publishForm.playerId != ''"
+                v-if="publishForm.playerId != ''&&publishForm.playerId!=null"
                 size="medium"
                 style="margin-left:10px"
               >#{{ this.getPlayerName(publishForm.playerId) }}</el-tag>
@@ -111,11 +111,12 @@
 import { getTeamList } from '@/api/team'
 import { getPlayerListByTeam } from '@/api/global'
 import { publish } from '@/api/manager'
+import { getToken,getUserInfo } from '@/utils/auth'
 export default {
   data() {
     return {
-      auth: '陈明富',
-      userId: '121387',
+      auth: '',
+      userId: '',
       dialogVisible: false,
       teamList: [],
       playerList: [],
@@ -131,8 +132,8 @@ export default {
         authId: '',
         title: '',
         playerId: '',
-        home: '',
-        away: '',
+        homeId: '',
+        awayId: '',
         content: '',
       },
       rules: {
@@ -152,6 +153,9 @@ export default {
     }
   },
   created() {
+    var user = JSON.parse(getUserInfo())
+    this.auth = user.userName
+    this.userId = user.userId
     getTeamList().then((res) => {
       this.teamList = res.data
     })
@@ -218,10 +222,9 @@ export default {
     isTrue(obj1, obj2) {
       if (obj1.title.toString() != obj2.title.toString()) return false
       if (obj1.playerId.toString() != obj2.playerId.toString()) return false
-      if (obj1.home.toString() != obj2.home.toString()) return false
-      if (obj1.away.toString() != obj2.away.toString()) return false
+      if (obj1.homeId.toString() != obj2.homeId.toString()) return false
+      if (obj1.awayId.toString() != obj2.awayId.toString()) return false
       if (obj1.content.toString() != obj2.content.toString()) return false
-      console.log("******")
       return true
     },
     resetForm(formName) {

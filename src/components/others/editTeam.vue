@@ -93,7 +93,7 @@ export default {
     this.elId = Math.random().toString(36).slice(-8)
   },
   watch: {
-    data: {
+    dialogVisible: {
       handler(newValue, oldValue) {
         this.editForm = this.data
         this.closed = this.dialogVisible

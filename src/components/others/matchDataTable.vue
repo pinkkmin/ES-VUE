@@ -27,8 +27,14 @@
             round
             style="float：left;"
             type="primary"
-            @click="dialog=true, handleEditMatchData(scope.$index)"
-          >编 辑</el-button>
+            @click="
+              ;(isHome = true),
+                (dialog = true),
+                  editIndex= scope.$index,
+                handleEditMatchData()
+            "
+            >编 辑</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -52,12 +58,22 @@
             size="small"
             round
             style="float：left;"
-            @click="dialog=true, handleEditMatchData(scope.$index)"
-          >编 辑</el-button>
+            @click="
+              ;(isHome = false),
+                (dialog = true),
+                editIndex= scope.$index,
+                handleEditMatchData()
+            "
+            >编 辑</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="赛事数据管理-编辑" :visible.sync="dialog" :before-close="handleClose">
+    <el-dialog
+      title="赛事数据管理-编辑"
+      :visible.sync="dialog"
+      :before-close="handleClose"
+    >
       <el-form :model="editForm" :rules="rules" ref="editForm">
         <el-form-item label="上场时间">
           <el-col :span="21">
@@ -76,7 +92,12 @@
         </el-form-item>
         <el-form-item label="助攻">
           <el-col :span="21">
-            <el-slider v-model="editForm.assist" :min="0" :max="50" show-input />
+            <el-slider
+              v-model="editForm.assist"
+              :min="0"
+              :max="50"
+              show-input
+            />
           </el-col>
         </el-form-item>
         <el-form-item label="盖帽">
@@ -91,7 +112,12 @@
         </el-form-item>
         <el-form-item label="失误">
           <el-col :span="21">
-            <el-slider v-model="editForm.turnOver" :min="0" :max="25" show-input />
+            <el-slider
+              v-model="editForm.turnOver"
+              :min="0"
+              :max="25"
+              show-input
+            />
           </el-col>
         </el-form-item>
         <el-form-item label="犯规">
@@ -107,10 +133,11 @@
         <el-form-item>
           <el-button
             round
-            style="float:right;margin-right:10px;"
+            style="float: right; margin-right: 10px"
             type="success"
-            @click="submitForm('editUserForm')"
-          >提 交</el-button>
+            @click="submitForm()"
+            >提 交</el-button
+          >
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -118,6 +145,7 @@
 </template>
 
 <script>
+import { editMatchData } from '@/api/manager'
 export default {
   props: {
     matchId: '',
@@ -139,14 +167,17 @@ export default {
         status: 0,
       },
       homeData: '',
-      awayData: ''
+      awayData: '',
     },
   },
   data() {
     return {
       dialog: false,
+      isHome: true,
+      match: '',
       homeTableData: this.data.homeData,
       awayTableData: this.data.awayData,
+      editIndex:0,
       editForm: {
         matchId: '',
         playerId: '',
@@ -161,6 +192,18 @@ export default {
         steal: '',
         free: '',
       },
+      rules:{}
+    }
+  },
+  watch:{
+ data:{
+      handler(newValue, oldValue) {
+          console.log(this.data)
+       this.match = this.data.match
+     
+      },
+      immediate: true,
+      deep: true,
     }
   },
   methods: {
@@ -171,9 +214,13 @@ export default {
         })
         .catch((_) => {})
     },
-    handleEditMatchData(index) {},
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    handleEditMatchData() {
+      if (this.isHome) this.editForm = Object.assign({}, this.homeTableData[this.editIndex])
+      else this.editForm = Object.assign({}, this.awayTableData[this.editIndex])
+      this.editForm.matchId = this.match.matchId
+    },
+    submitForm() {
+      this.$refs.editForm.validate((valid) => {
         if (valid) {
           this.$confirm('确认提交, 是否继续?', '提示', {
             confirmButtonText: '确定',
@@ -181,15 +228,23 @@ export default {
             type: 'warning',
           })
             .then((_) => {
-              this.$notify({
-                title: '提示',
-                message: '修改成功',
-                duration: 1000,
+              editMatchData(this.editForm).then((res) => {
+                if(this.isHome) { this.$set(this.homeTableData,this.editIndex,this.editForm)
+                  }
+                else {this.$set(this.awayTableData,this.editIndex,this.editForm)
+                 }
+                this.$emit("update-match");
+                this.$notify({
+                  title: '提示',
+                  message: '修改成功',
+                  duration: 1000,
+                })
               })
+
               this.dialog = false
             })
             .catch((_) => {})
-        } else {  
+        } else {
           return false
         }
       })

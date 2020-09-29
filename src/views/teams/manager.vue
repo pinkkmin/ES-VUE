@@ -1,53 +1,78 @@
 <template>
   <div>
-    <el-card v-loading="loading" class="analysis-card" style="height:200px;">
-      <div style="float:left;">
+    <el-card v-loading="loading" class="analysis-card" style="height: 200px">
+      <div style="float: left">
         <el-image
           style="width: 170px; height: 170px"
-          :src="'team/' + team.teamId +'.png'"
+          :src="teamUrl + team.teamId + '.png'"
         ></el-image>
       </div>
-      <div style="float:left;margin-left:20px;">
-        <div style="color: #2ec7ee;font-size:30px;font-weight: bolder;">{{ team.name }}</div>
-        <ul style="list-style: none;margin-left:-13%;">
+      <div style="float: left; margin-left: 20px">
+        <div style="color: #2ec7ee; font-size: 30px; font-weight: bolder">
+          {{ team.name }}
+        </div>
+        <ul style="list-style: none; margin-left: -13%">
           <li>
-            <span style="font-size:20px;">教练:</span>
-            <el-tag style="font-size:16px;margin-bottom:2px;">{{ team.coach }}</el-tag>
+            <span style="font-size: 20px">教练:</span>
+            <el-tag style="font-size: 16px; margin-bottom: 2px">{{
+              team.coach
+            }}</el-tag>
           </li>
-          <li style="margin-bottom:3px;">
-            <span style="font-size:20px;">城市:</span>
-            <span style="font-size:17px;">{{ team.city }}</span>
+          <li style="margin-bottom: 3px">
+            <span style="font-size: 20px">城市:</span>
+            <span style="font-size: 17px">{{ team.city }}</span>
           </li>
-          <li style="margin-bottom:4px;">
-            <span style="font-size:20px;">主场:</span>
-            <span style="font-size:17px;">{{ team.home }}</span>
+          <li style="margin-bottom: 4px">
+            <span style="font-size: 20px">主场:</span>
+            <span style="font-size: 17px">{{ team.home }}</span>
           </li>
-          <li style="margin-bottom:2px;">
-            <span style="font-size:20px;">俱乐部:</span>
-            <span style="font-size:17px;">{{ team.club }}</span>
+          <li style="margin-bottom: 2px">
+            <span style="font-size: 20px">俱乐部:</span>
+            <span style="font-size: 17px">{{ team.club }}</span>
           </li>
         </ul>
       </div>
       <el-button
-        style="float:right;font-size:18px;"
+        style="float: right; font-size: 18px"
         type="danger"
         size="medium"
-        @click="dialogVisible=true, handleEdit()"
-      >编 辑</el-button>
-      <el-dialog title="球队信息-编辑" :visible.sync="dialogVisible" :before-close="handleClose">
-        <editTeam ref="editForm" title="修 改" :data="team" />
-      </el-dialog>
+        @click="(dialogVisible = true)"
+        >编 辑</el-button
+      > 
+        <editTeam  :dialogVisible="dialogVisible" title="修 改" @my-event="updateTeamForm" :data="team" />
     </el-card>
-    <el-card v-loading="loading" style="vertical-align:middle;float: left;margin:10px 10px 10px 20px;width: 97%;">
+    <el-card
+      v-loading="loading"
+      style="
+        vertical-align: middle;
+        float: left;
+        margin: 10px 10px 10px 20px;
+        width: 97%;
+      "
+    >
       <el-table :data="playerTable" style="width: 100%">
         <el-table-column prop="date" width="80">
           <template slot-scope="scope">
-            <el-link href="https://element.eleme.io" target="_blank" :underline="false">
+            <router-link
+              target="_blank"
+              :underline="false"
+              :to="{
+                name: 'public_player',
+                params: { playerId: playerTable[scope.$index].playerId },
+              }"
+            >
               <el-image
-                style="width: 75px; height: 70px;background-color:#fff;"
-                :src="baseUrl + getLogoUrl(playerTable[scope.$index].logo,playerTable[scope.$index].playerId) +'.png'"
+                style="width: 75px; height: 70px; background-color: #fff"
+                :src="
+                  baseUrl +
+                  getLogoUrl(
+                    playerTable[scope.$index].logo,
+                    playerTable[scope.$index].playerId
+                  ) +
+                  '.png'
+                "
               />
-            </el-link>
+            </router-link>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="姓名" />
@@ -65,21 +90,31 @@
               size="medium"
               round
               style="float：left;"
-              @click="dialogPlayer=true, handleEditPlayer(scope.$index)"
-            >编 辑</el-button>
+              @click="
+                ;(dialogPlayer = true),
+                  (editIndex = scope.$index),
+                  handleEditPlayer()
+              "
+              >编 辑</el-button
+            >
             <el-button
               type="warning"
               size="medium"
               round
               style="float：left;margin-left:10px;"
-              @click="dialogDealPlayer=true"
-            >操 作</el-button>
+              @click="dialogDealPlayer = true"
+              >操 作</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
-      <el-dialog title="球员管理-编辑球员" :visible.sync="dialogPlayer" :before-close="handleClosePlayer">
-        <editPlayer ref="editPlayerForm" title="修 改" :data="playerForm" />
-      </el-dialog>
+      <editPlayer
+        :dialogVisible="dialogPlayer"
+        @my-player="updateEditForm"
+        :numberData="numberList"
+        title="修 改"
+        :data="playerForm"
+      />
       <el-dialog
         title="球员管理-处理球员"
         :visible.sync="dialogDealPlayer"
@@ -95,13 +130,17 @@
           :model="dealForm"
           :rules="dealRules"
           ref="dealPlayerForm"
-          style="margin-top:20px;"
+          style="margin-top: 20px"
         >
           <el-form-item label="交易至" prop="awayId">
-            <el-select v-model="dealForm.awayId" clearable placeholder="请选择球队">
+            <el-select
+              v-model="dealForm.awayId"
+              clearable
+              placeholder="请选择球队"
+            >
               <el-option
-                v-for="(item,index) in teamList"
-                :key="'team'+index"
+                v-for="(item, index) in teamList"
+                :key="'team' + index"
                 :disabled="item.teamId === team.teamId"
                 :label="item.teamName"
                 :value="item.teamId"
@@ -109,13 +148,14 @@
             </el-select>
           </el-form-item>
         </el-form>
-        <div style="height:30px;">
+        <div style="height: 30px">
           <el-button
             round
-            style="float:right;margin0:0px 10px 50px 0px "
+            style="float: right; margin0: 0px 10px 50px 0px"
             @click="submitDealPlayer()"
             type="success"
-          >提 交</el-button>
+            >提 交</el-button
+          >
         </div>
       </el-dialog>
     </el-card>
@@ -127,8 +167,11 @@
  */
 import editTeam from '@/components/others/editTeam.vue'
 import editPlayer from '@/components/others/editPlayer.vue'
-import { getCurSeason } from '@/api/global'
-import { getTeamInfo,getTeamList,getPlayersByTeamId } from '@/api/team'
+import { getNumberList } from '@/api/global'
+import { getTeamInfo, getTeamList, getPlayersByTeamId } from '@/api/team'
+import { getToken } from '@/utils/auth'
+import { dealPlayer } from '@/api/manager'
+import { getInfo, altInfo } from '@/api/user'
 export default {
   components: {
     editTeam,
@@ -139,11 +182,15 @@ export default {
       dialogVisible: false,
       dialogPlayer: false,
       dialogDealPlayer: false,
-      loading:true,
-      baseUrl:'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
-      teamId:'cba2020019',
+      loading: true,
+      baseUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/player/',
+      teamUrl: 'https://es-1301702299.cos.ap-nanjing.myqcloud.com/team/',
+      teamId: 'cba2020019',
       playerTable: [],
       teamList: [],
+      numberList: [],
+      editIndex: 0,
+      selectPlayer: 0, // 选中为球员的下标
       radioSelect: '解约',
       team: {
         teamId: 'cba2020019',
@@ -153,8 +200,15 @@ export default {
         home: '',
         club: '',
       },
+      queryForm: {
+        // 查询提交表单
+        teamId: '',
+        page: 0,
+        pageSize: 10,
+      },
       playerForm: {
         playerId: '',
+        teamId: '',
         name: '',
         brith: '',
         height: 0.0,
@@ -164,8 +218,8 @@ export default {
         positon: '',
       },
       dealForm: {
-        playerId:'',
-        option: '',  // 选择 解约 交易 退役
+        playerId: '',
+        option: '', // 选择 解约 交易 退役
         homeId: '',
         awayId: '',
       },
@@ -175,54 +229,64 @@ export default {
     }
   },
   created() {
-     getCurSeason().then((res) => {
-        this.loading = false
-      })
-      getTeamList().then((res)=>{
-        this.teamList = res.data
-      })
-      var parse ={}
-      parse.teamId =  this.teamId
-      parse.page = 0
-      parse.pageSize = 100
-      getTeamInfo(parse).then((res)=>{
+    getTeamList().then((res) => {
+      this.teamList = res.data
+    })
+    var token = getToken()
+    getInfo(token).then((res) => {
+      this.teamId = res.data.team.teamId
+      this.queryForm.teamId = this.teamId
+      this.queryForm.page = 0
+      this.queryForm.pageSize = 100
+      getTeamInfo(this.queryForm).then((res) => {
         this.team = res.data
-        })
-      getPlayersByTeamId(parse).then((res)=>{
+      })
+      getPlayersByTeamId(this.queryForm).then((res) => {
         this.playerTable = res.data.data
         this.loading = false
       })
+    })
   },
   methods: {
-    getLogoUrl(logo,playerId) {
-       if(logo===1)  return playerId
+    getLogoUrl(logo, playerId) {
+      if (logo === 1) return playerId
       return '0'
     },
-    handleEdit() {
-      this.$refs.editForm.setForm(this.team)
+    handleEditPlayer() {
+      this.playerForm = Object.assign({}, this.playerTable[this.editIndex])
+      getNumberList(this.playerForm).then((res) => {
+        this.numberList = res.data.data
+      })
     },
-    handleEditPlayer(index) {
-      this.playerForm = this.playerTable[index]
-      this.$refs.editPlayerForm.setForm(this.playerForm)
-    },
-     handleClose(done) {
+    handleClose(done) {
       this.$confirm('确认关闭？')
         .then((_) => {
           done()
         })
         .catch((_) => {})
+    },  
+    updateTeamForm(data) {
+      this.$set(this.team, data)
+      this.dialogVisible = false
+    },
+    updateEditForm(data) {
+      //编辑完成更新数据
+      this.$set(this.playerTable, this.editIndex, data)
+      getPlayersByTeamId(this.queryForm).then((res) => {
+        this.playerTable = res.data.data
+        this.loading = false
+      })
+      this.dialogPlayer = false
     },
     handleClosePlayer(done) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          done()
-        })
-        .catch((_) => {})
+      this.$confirm('确认关闭？').then((_) => {
+        done()
+      })
     },
     submitDealPlayer() {
       if (this.radioSelect === '解约') this.$message('解约')
       else if (this.radioSelect === '退役') this.$message('退役')
-      else { 
+      else {
         this.$refs['dealPlayerForm'].validate((valid) => {
           if (valid) {
             this.$message('交易')

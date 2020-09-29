@@ -11,7 +11,7 @@ import request from '@/utils/request'
 
 export function getCurSeason() {
   return request({
-    url: '/api/global/curSeason',
+    url: 'api/global/curSeason',
     method: 'get'
   })
 }
@@ -24,7 +24,7 @@ export function getSeasonList() {
 }
 export function getTeamList(){
   return request({
-    url: '/api/global/teamList',
+    url: 'api/global/teamList',
     method: 'get'
   })
 }
@@ -36,14 +36,14 @@ export function getPlayerListByTeam() {
 }
 export function getMatchsByDay(data_){
   return request({
-    url: '/api/global/matchByDay',
+    url: 'api/global/matchByDay',
     method: 'post',
     data:data_
   })
 }
 export function updateFile(file_csv,parse_) {
   return request({
-    url: '/api/global/updateFile',
+    url: 'api/global/updateFile',
     method: 'post',
     data: file_csv,parse_
 
@@ -51,7 +51,7 @@ export function updateFile(file_csv,parse_) {
 }
 export function doKeyNumber(data_) {
   return request({
-    url: '/api/global/getKeyNumber',
+    url: 'api/global/getKeyNumber',
     method: 'post',
     data:data_
 
@@ -59,7 +59,7 @@ export function doKeyNumber(data_) {
 }
 export function regKeyNumber(data_) {
   return request({
-    url: '/api/global/regKeyNumber',
+    url: 'api/global/regKeyNumber',
     method: 'post',
     data:data_
 
@@ -67,7 +67,7 @@ export function regKeyNumber(data_) {
 }
 export function resetPwd(data_) {
   return request({
-    url: '/api/global/resetPwd',
+    url: 'api/global/resetPwd',
     method: 'post',
     data:data_
 
@@ -75,7 +75,7 @@ export function resetPwd(data_) {
 }
 export function register(data_) {
   return request({
-    url: '/api/global/register',
+    url: 'api/global/register',
     method: 'post',
     data:data_
 
@@ -83,7 +83,7 @@ export function register(data_) {
 }
 export function getPlayerService(data_) {
   return request({
-    url: '/api/global/playerService',
+    url: 'api/global/playerService',
     method: 'post',
     data:data_
 
@@ -92,6 +92,16 @@ export function getPlayerService(data_) {
 export function getAllPlayer(data_) {
   return request({
     url: 'api/global/queryPlayerList',
+    method: 'post',
+    data:data_
+
+  })
+}
+// 球队-球员号码列表
+
+export function getNumberList(data_) {
+  return request({
+    url: 'api/global/numberList',
     method: 'post',
     data:data_
 
